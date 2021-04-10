@@ -1,10 +1,9 @@
 import React from "react";
-import { connect } from "react-redux";
-import { useSelector, shallowEqual } from "react-redux";
 
-import DemoComp from "../components/demo";
+import Socket from "../../components/socket/socket";
+import DemoComp from "../../components/demo/demo";
 
-export default class Demo extends React.Component {
+export default class Demo extends Socket {
   constructor(props) {
     super(props);
     this.state = {
@@ -30,7 +29,7 @@ export default class Demo extends React.Component {
         >
           Click me
         </button>
-        <DemoComp id={this.state.clicks} />
+        <DemoComp id={this.state.clicks} client={this.client} />
       </div>
     );
   }

@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
+import { changeCurNum } from "../../redux/demoReducer";
 
-import { wrapper } from "../redux/store";
-import { changeCurNum } from "../redux/demoReducer";
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 const mapStateToProps = (state, props) => {
   return {
@@ -13,7 +13,8 @@ const mapStateToProps = (state, props) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    changeCurNum: (newNum) => changeCurNum(newNum)(dispatch),
+    changeCurNum: (newNum, client) => changeCurNum(newNum, client)(dispatch),
+    dispatch,
   };
 };
 
@@ -26,9 +27,18 @@ class Demo extends React.Component {
     };
   }
 
+  componentDidMount() {
+    this.props.client.onmessage = (message) => {
+      console.log("Websocket: Received Message");
+      const dataFromServer = JSON.parse(message.data);
+      if (dataFromServer.type == "DEMO_SET_CURNUM") {
+        this.props.changeCurNum(dataFromServer.newNum);
+      }
+    };
+  }
+
   onChange(e) {
-    console.log("Changed num to: " + e.target.value);
-    this.props.changeCurNum(e.target.value);
+    this.props.changeCurNum(e.target.value, client);
   }
 
   render() {

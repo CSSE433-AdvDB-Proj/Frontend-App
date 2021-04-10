@@ -1,5 +1,3 @@
-import { HYDRATE } from "next-redux-wrapper";
-
 const initialState = {
   0: "zero",
   1: "one",
@@ -12,8 +10,6 @@ const initialState = {
 
 const demoReducer = (state = initialState, action) => {
   switch (action.type) {
-    case HYDRATE:
-      return action.payload.demoReducer;
     case "test":
       return { ...state, 3: "three" };
     case "DEMO_SET_CURNUM":
@@ -31,8 +27,12 @@ const demoReducer = (state = initialState, action) => {
 
 export default demoReducer;
 
-export const changeCurNum = (newNum) => {
+export const changeCurNum = (newNum, client) => {
   return (dispatch) => {
-    dispatch({ type: "DEMO_SET_CURNUM", newNum: newNum });
+    const payload = { type: "DEMO_SET_CURNUM", newNum };
+    if (client) {
+      client.send(JSON.stringify(payload));
+    }
+    dispatch(payload);
   };
 };
