@@ -1,9 +1,9 @@
 import React from "react";
 
-import Socket from "../../components/socket/socket";
 import DemoComp from "../../components/demo/demo";
+import CustomHead from "../../components/general/customHead";
 
-export default class Demo extends Socket {
+export default class Demo extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -14,22 +14,25 @@ export default class Demo extends Socket {
 
   render() {
     return (
-      <div
-        style={{
-          backgroundColor: "black",
-          borderRadius: 5,
-          color: "white",
-          textAlign: "center",
-        }}
-      >
-        <h1>Demo Test</h1>
-        <p>States: {this.state.clicks}</p>
-        <button
-          onClick={() => this.setState({ clicks: this.state.clicks + 1 })}
+      <div>
+        <CustomHead title="Demo page" />
+        <div
+          style={{
+            backgroundColor: "black",
+            borderRadius: 5,
+            color: "white",
+            textAlign: "center",
+          }}
         >
-          Click me
-        </button>
-        <DemoComp id={this.state.clicks} client={this.client} />
+          <h1>Demo Test</h1>
+          <p>States: {this.state.clicks}</p>
+          <button
+            onClick={() => this.setState({ clicks: this.state.clicks + 1 })}
+          >
+            Click me
+          </button>
+          <DemoComp id={this.state.clicks} client={this.props.client} />
+        </div>
       </div>
     );
   }
