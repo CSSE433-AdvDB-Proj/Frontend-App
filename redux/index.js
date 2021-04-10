@@ -4,7 +4,7 @@ import demoReducer from "./demoReducer";
 const getStore = (preloadState, options) => {
   return createStore(
     combineReducers({
-      demo: demoReducer,
+      demoReducer,
     }),
     preloadState
   );
