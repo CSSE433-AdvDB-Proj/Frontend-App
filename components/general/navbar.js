@@ -18,6 +18,7 @@ class Navbar extends React.PureComponent {
   }
 
   openModal(state) {
+    console.log(state);
     this.modal.current.openModal(state);
   }
 
@@ -32,7 +33,7 @@ class Navbar extends React.PureComponent {
             <a href="/demo/demo">Demo</a>
           </li>
           <li className="rightli dropdown">
-            <a className="dropbtn" onClick={() => this.openModal()}>
+            <a className="dropbtn">
               <UserOutlined />
             </a>
             <div className="dropdown-content">
@@ -93,19 +94,21 @@ const styles = css`
     z-index: 1;
     right: 0;
     border-radius: 0px 0px 5px 5px;
-    padding-bottom: 2px;
   }
 
   .dropdown-content a {
     color: white;
     padding: 2px 4px;
+    padding-bottom: 4px;
     text-decoration: none;
     display: block;
     text-align: left;
+    border-radius: 0px 0px 5px 5px;
   }
 
   .dropdown-content a:hover {
-    background-color: #111;
+    background-color: #333;
+    cursor: pointer;
   }
 
   .dropdown:hover .dropdown-content {

@@ -24,6 +24,17 @@ const getUniqueID = () => {
   return s4() + s4() + "-" + s4();
 };
 
+const sendToOthers = (content, userID) => {
+  for (let client in clients) {
+    let conn = clients[client];
+    if (client != userID) {
+      conn.sendUTF(JSON.stringify(content));
+    }
+  }
+
+  return null;
+};
+
 wsServer.on("request", function (request) {
   var userID = getUniqueID();
   // console.log(
@@ -39,17 +50,19 @@ wsServer.on("request", function (request) {
   //   "connected: " + userID + " in " + Object.getOwnPropertyNames(clients)
   // );
 
-  //   connection.on("message", function (message) {
-  //     if (message.type === "utf8") {
-  //       console.log("Received Message: " + message.utf8Data);
-  //       for (let client in clients) {
-  //         let conn = clients[client];
-  //         if (client != connection) {
-  //           conn.sendUTF(message.utf8Data);
-  //         }
-  //       }
-  //     }
-  //   });
+  connection.on("message", function (message) {
+    console.log("Got a message!");
+    if (message.type === "utf8") {
+      const dataFromClient = JSON.parse(message.utf8Data);
+      dataFromClient.sender = userID;
+
+      switch (dataFromClient.type) {
+        case "TEST_CHAT_MESSAGE":
+        case "DEMO_SET_CURNUM":
+          return sendToOthers(dataFromClient, userID);
+      }
+    }
+  });
 });
 
 let getPrompt = () => {

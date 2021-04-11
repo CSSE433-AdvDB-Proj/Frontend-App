@@ -25,34 +25,23 @@ class Demo extends React.Component {
     };
   }
 
-  componentDidMount() {
-    this.props.client.onmessage = (message) => {
-      console.log("Websocket: Received Message");
-      const dataFromServer = JSON.parse(message.data);
-      if (dataFromServer.type == "DEMO_SET_CURNUM") {
-        this.props.changeCurNum(dataFromServer.newNum);
-      }
-    };
-  }
 
   onChange(e) {
     this.props.changeCurNum(e.target.value, this.props.client);
   }
 
   render() {
-    // console.log(this.props.studentListServer);
     return (
-      <div
-        style={
-          {
-            // textAlign: "center",
-          }
-        }
-      >
+      <div>
         <h3>Demo Component</h3>
 
-        <p>{this.props.demo ? this.props.demo : "Dunno"}</p>
+        {/* reducer state (on_message) */}
         <p>Current Num: {this.props.curNum.value}</p>
+
+        {/* reducer state (from parent) */}
+        <p>{this.props.demo ? this.props.demo : "Dunno"}</p>
+
+        {/* map changes */}
         <input type="number" onChange={(e) => this.onChange(e)} />
       </div>
     );

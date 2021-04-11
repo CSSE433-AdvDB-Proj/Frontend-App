@@ -23,6 +23,13 @@ export default class MyApp extends App {
     this.client.onclose = () => {
       console.log("Websocket: Disconnected");
     };
+
+    this.client.onmessage = (message) => {
+      console.log("Websocket: Received Message");
+      const dataFromServer = JSON.parse(message.data);
+      dataFromServer.fromServer = true;
+      this.store.dispatch(dataFromServer);
+    };
   }
 
   render() {

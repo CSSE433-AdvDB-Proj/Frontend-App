@@ -11,8 +11,7 @@ export default class Container extends React.PureComponent {
         <style global jsx>
           {`
             html,
-            body,
-            div {
+            body {
               background-color: gray;
               padding: 0;
               margin: 0;

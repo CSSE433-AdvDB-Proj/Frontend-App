@@ -11,6 +11,7 @@
 - https://codeconqueror.com/blog/state-management-in-next-js
 - https://www.npmjs.com/package/websocket
 - https://blog.logrocket.com/websockets-tutorial-how-to-go-real-time-with-node-and-react-8e4693fbf843/
+- use next/link for redirects if cant find pull up next.js nav guide
 
 # To-Do
 
