@@ -2,8 +2,6 @@ import React from "react";
 import { connect } from "react-redux";
 import { changeCurNum } from "../../redux/demoReducer";
 
-import { w3cwebsocket as W3CWebSocket } from "websocket";
-
 const mapStateToProps = (state, props) => {
   return {
     demo: state.demoReducer[props.id],
@@ -38,17 +36,18 @@ class Demo extends React.Component {
   }
 
   onChange(e) {
-    this.props.changeCurNum(e.target.value, client);
+    this.props.changeCurNum(e.target.value, this.props.client);
   }
 
   render() {
     // console.log(this.props.studentListServer);
     return (
       <div
-        style={{
-          color: "white",
-          textAlign: "center",
-        }}
+        style={
+          {
+            // textAlign: "center",
+          }
+        }
       >
         <h3>Demo Component</h3>
 

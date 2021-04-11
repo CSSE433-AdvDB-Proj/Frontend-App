@@ -1,11 +1,12 @@
 import React from "react";
 import { Provider } from "react-redux";
 import App from "next/app";
-import Head from "next/head";
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 import getStore from "../redux/index";
 import NavBar from "../components/general/navbar";
+
+import Container from "../components/general/container";
 
 export default class MyApp extends App {
   constructor(props) {
@@ -14,15 +15,6 @@ export default class MyApp extends App {
   }
 
   store = getStore({});
-
-  // static async getInitialProps({ Component, ctx }) {
-  //   const pageProps = Component.getInitialProps
-  //     ? await Component.getInitialProps(ctx)
-  //     : {};
-
-  //   //Anything returned here can be access by the client
-  //   return { pageProps: pageProps };
-  // }
 
   componentDidMount() {
     this.client.onopen = () => {
@@ -35,11 +27,16 @@ export default class MyApp extends App {
 
   render() {
     const { Component, pageProps } = this.props;
+    // console.log(styles);
     return (
-      <Provider store={this.store}>
-        <NavBar />
-        <Component {...pageProps} client={this.client} />
-      </Provider>
+      <Container>
+        <Provider store={this.store}>
+          <div>
+            <NavBar />
+            <Component {...pageProps} client={this.client} />
+          </div>
+        </Provider>
+      </Container>
     );
   }
 }

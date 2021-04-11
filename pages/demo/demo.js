@@ -18,9 +18,9 @@ export default class Demo extends React.Component {
         <CustomHead title="Demo page" />
         <div
           style={{
-            backgroundColor: "black",
+            // backgroundColor: "black",
             borderRadius: 5,
-            color: "white",
+            color: "black",
             textAlign: "center",
           }}
         >
