@@ -17,6 +17,7 @@ export default class MyApp extends App {
   store = getStore({});
 
   componentDidMount() {
+    
     this.client.onopen = () => {
       console.log("WebSocket: Connected");
     };

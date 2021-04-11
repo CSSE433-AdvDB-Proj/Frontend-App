@@ -25,7 +25,6 @@ class Demo extends React.Component {
     };
   }
 
-
   onChange(e) {
     this.props.changeCurNum(e.target.value, this.props.client);
   }

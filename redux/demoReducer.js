@@ -4,6 +4,7 @@ const initialState = {
   2: "two",
   3: "",
   curNum: {
+    hello: "world",
     value: 0,
   },
 };

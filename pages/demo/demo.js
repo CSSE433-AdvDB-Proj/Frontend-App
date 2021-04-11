@@ -1,6 +1,6 @@
 import React from "react";
 
-import DemoComp from "../../components/demo/demo";
+import DemoComp from "../../components/demo/demoComp";
 import TestChat from "../../components/demo/testChat";
 import CustomHead from "../../components/general/customHead";
 
@@ -11,7 +11,7 @@ export default class Demo extends React.Component {
     super(props);
     this.state = {
       clicks: 0,
-      secretClicks: 2,
+      hello: "world",
     };
   }
 

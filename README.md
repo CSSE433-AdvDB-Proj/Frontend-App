@@ -1,3 +1,9 @@
+# Setup
+- npm install
+
+# Run
+- npm run dev
+
 # Socket
 
 - Every page is connected through socket
