@@ -18,7 +18,7 @@ class Navbar extends React.PureComponent {
   }
 
   openModal(state) {
-    console.log(state);
+    // this.props.createClient("test");
     this.modal.current.openModal(state);
   }
 
@@ -42,7 +42,10 @@ class Navbar extends React.PureComponent {
             </div>
           </li>
         </ul>
-        <AuthModal ref={this.modal} />
+        <AuthModal
+          ref={this.modal}
+          createClient={(t) => this.props.createClient(t)}
+        />
         <style jsx>{styles}</style>
       </nav>
     );
