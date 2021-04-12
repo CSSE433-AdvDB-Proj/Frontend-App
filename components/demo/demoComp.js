@@ -5,7 +5,7 @@ import { changeCurNum } from "../../redux/demoReducer";
 const mapStateToProps = (state, props) => {
   return {
     demo: state.demoReducer[props.id],
-    curNum: state.demoReducer.curNum,
+    curNum: state.demoReducer,
   };
 };
 
@@ -35,7 +35,7 @@ class Demo extends React.Component {
         <h3>Demo Component</h3>
 
         {/* reducer state (on_message) */}
-        <p>Current Num: {this.props.curNum.value}</p>
+        <p>Current Num: {this.props.curNum.curNum.value}</p>
 
         {/* reducer state (from parent) */}
         <p>{this.props.demo ? this.props.demo : "Dunno"}</p>

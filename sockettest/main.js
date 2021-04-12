@@ -52,6 +52,7 @@ wsServer.on("request", function (request) {
 
   connection.on("message", function (message) {
     console.log("Got a message!");
+    console.log(message);
     if (message.type === "utf8") {
       const dataFromClient = JSON.parse(message.utf8Data);
       dataFromClient.sender = userID;

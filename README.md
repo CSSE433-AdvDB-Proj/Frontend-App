@@ -3,6 +3,8 @@
 
 # Run
 - npm run dev
+- for socket:
+  - node sockettest/main.js
 
 # Socket
 
