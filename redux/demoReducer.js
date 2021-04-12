@@ -28,11 +28,11 @@ const demoReducer = (state = initialState, action) => {
 
 export default demoReducer;
 
-export const changeCurNum = (newNum, client) => {
+export const changeCurNum = (newNum, send) => {
   return (dispatch) => {
     const payload = { type: "DEMO_SET_CURNUM", newNum };
-    if (client) {
-      client.send(JSON.stringify(payload));
+    if (send) {
+      send(JSON.stringify(payload));
     }
     dispatch(payload);
   };

@@ -32,8 +32,8 @@ export default class Demo extends React.Component {
           </button>
 
           {/* sub component */}
-          <DemoComp id={this.state.clicks} client={this.props.client} />
-          <TestChat client={this.props.client} />
+          <DemoComp send={(msg) => this.props.send(msg)} />
+          <TestChat send={(msg) => this.props.send(msg)} />
         </div>
         <style jsx>{styles}</style>
       </div>

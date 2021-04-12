@@ -20,7 +20,7 @@ const testChatReducer = (state = initialState, action) => {
 
 export default testChatReducer;
 
-export const sendMessage = (content, client) => {
+export const sendMessage = (content, send) => {
   return (dispatch) => {
     const payload = {
       type: "TEST_CHAT_MESSAGE",
@@ -28,8 +28,8 @@ export const sendMessage = (content, client) => {
       timestamp: "" + Date.now(),
       content,
     };
-    if (client) {
-      client.send(JSON.stringify(payload));
+    if (send) {
+      send(JSON.stringify(payload));
     }
     dispatch(payload);
   };

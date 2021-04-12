@@ -12,7 +12,7 @@ const mapStateToProps = (state, props) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    sendMessage: (content, client) => sendMessage(content, client)(dispatch),
+    sendMessage: (content, send) => sendMessage(content, send)(dispatch),
   };
 };
 
@@ -66,7 +66,7 @@ class TestChat extends React.Component {
           <button
             onClick={() => {
               this.setState({ content: "" });
-              this.props.sendMessage(this.state.content, this.props.client);
+              this.props.sendMessage(this.state.content, this.props.send);
             }}
           >
             Send Message

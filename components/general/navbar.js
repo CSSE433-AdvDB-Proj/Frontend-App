@@ -19,7 +19,9 @@ class Navbar extends React.PureComponent {
 
   openModal(state) {
     // this.props.createClient("test");
-    this.modal.current.openModal(state);
+    this.props.setToken("12314");
+    console.log("token set");
+    // this.modal.current.openModal(state);
   }
 
   render() {
@@ -42,10 +44,7 @@ class Navbar extends React.PureComponent {
             </div>
           </li>
         </ul>
-        <AuthModal
-          ref={this.modal}
-          createClient={(t) => this.props.createClient(t)}
-        />
+        <AuthModal ref={this.modal} setToken={(t) => this.props.setToken(t)} />
         <style jsx>{styles}</style>
       </nav>
     );

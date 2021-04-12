@@ -1,7 +1,8 @@
 import React from "react";
 import { Provider } from "react-redux";
 import App from "next/app";
-import { w3cwebsocket as W3CWebSocket } from "websocket";
+
+import SockJsClient from "react-stomp";
 
 import getStore from "../redux/index";
 import NavBar from "../components/general/navbar";
@@ -13,43 +14,32 @@ export default class MyApp extends App {
     super(props);
 
     this.store = getStore({});
-    this.client = null;
 
-    this.createClient = (token) => {
-      console.log(token);
-      this.client = new W3CWebSocket("ws://127.0.0.1:8000");
-
-      this.client.onopen = () => {
-        console.log("WebSocket: Connected");
-      };
-
-      this.client.onclose = () => {
-        console.log("Websocket: Disconnected");
-      };
-
-      this.client.onmessage = (message) => {
-        console.log("Websocket: Received Message");
-        const dataFromServer = JSON.parse(message.data);
-        dataFromServer.fromServer = true;
-        this.store.dispatch(dataFromServer);
-      };
+    this.state = {
+      token: null,
     };
   }
 
-  componentDidMount() {
-    // this.client.onopen = () => {
-    //   console.log("WebSocket: Connected");
-    // };
-    // this.client.onclose = () => {
-    //   console.log("Websocket: Disconnected");
-    // };
-    // this.client.onmessage = (message) => {
-    //   console.log("Websocket: Received Message");
-    //   const dataFromServer = JSON.parse(message.data);
-    //   dataFromServer.fromServer = true;
-    //   this.store.dispatch(dataFromServer);
-    // };
-  }
+  componentDidMount() {}
+
+  send = (msg) => {
+    if (this.state.token == null) {
+      return;
+    }
+    console.log("Sending: " + msg);
+    // this.clientRef.sendMessage("/topics/all", msg);
+  };
+
+  onMessage = (msg) => {
+    console.log(msg);
+  };
+
+  setToken = (token) => {
+    this.setState({ token });
+    if (token == null) {
+      this.clientRef.disconnect();
+    }
+  };
 
   render() {
     const { Component, pageProps } = this.props;
@@ -58,8 +48,17 @@ export default class MyApp extends App {
       <Container>
         <Provider store={this.store}>
           <div>
-            <NavBar createClient={(t) => this.createClient(t)} />
-            <Component {...pageProps} client={this.client} />
+            {this.state.token == null ? null : (
+              <SockJsClient
+                key={this.state.token}
+                url={`http://localhost:8080/myUrl?token=${this.state.token}`}
+                topics={["/topics/all"]}
+                onMessage={(msg) => this.onMessage(msg)}
+                ref={(client) => (this.clientRef = client)}
+              />
+            )}
+            <NavBar setToken={(t) => this.setToken(t)} />
+            <Component {...pageProps} send={(msg) => this.send(msg)} />
           </div>
         </Provider>
       </Container>

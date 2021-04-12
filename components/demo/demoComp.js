@@ -11,7 +11,7 @@ const mapStateToProps = (state, props) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    changeCurNum: (newNum, client) => changeCurNum(newNum, client)(dispatch),
+    changeCurNum: (newNum, send) => changeCurNum(newNum, send)(dispatch),
     dispatch,
   };
 };
@@ -26,7 +26,7 @@ class Demo extends React.Component {
   }
 
   onChange(e) {
-    this.props.changeCurNum(e.target.value, this.props.client);
+    this.props.changeCurNum(e.target.value, this.props.send);
   }
 
   render() {
