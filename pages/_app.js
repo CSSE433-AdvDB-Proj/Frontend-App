@@ -13,42 +13,26 @@ export default class MyApp extends App {
     super(props);
 
     this.store = getStore({});
-    this.client = null;
+    // this.client = null;
 
-    this.createClient = (token) => {
-      console.log(token);
-      this.client = new W3CWebSocket("ws://127.0.0.1:8000");
-
-      this.client.onopen = () => {
-        console.log("WebSocket: Connected");
-      };
-
-      this.client.onclose = () => {
-        console.log("Websocket: Disconnected");
-      };
-
-      this.client.onmessage = (message) => {
-        console.log("Websocket: Received Message");
-        const dataFromServer = JSON.parse(message.data);
-        dataFromServer.fromServer = true;
-        this.store.dispatch(dataFromServer);
-      };
-    };
+    // this.createClient = (token) => {
+    //   console.log(token);
+    this.client = new W3CWebSocket("ws://127.0.0.1:8000");
   }
 
   componentDidMount() {
-    // this.client.onopen = () => {
-    //   console.log("WebSocket: Connected");
-    // };
-    // this.client.onclose = () => {
-    //   console.log("Websocket: Disconnected");
-    // };
-    // this.client.onmessage = (message) => {
-    //   console.log("Websocket: Received Message");
-    //   const dataFromServer = JSON.parse(message.data);
-    //   dataFromServer.fromServer = true;
-    //   this.store.dispatch(dataFromServer);
-    // };
+    this.client.onopen = () => {
+      console.log("WebSocket: Connected");
+    };
+    this.client.onclose = () => {
+      console.log("Websocket: Disconnected");
+    };
+    this.client.onmessage = (message) => {
+      console.log("Websocket: Received Message");
+      const dataFromServer = JSON.parse(message.data);
+      dataFromServer.fromServer = true;
+      this.store.dispatch(dataFromServer);
+    };
   }
 
   render() {
@@ -58,7 +42,7 @@ export default class MyApp extends App {
       <Container>
         <Provider store={this.store}>
           <div>
-            <NavBar createClient={(t) => this.createClient(t)} />
+            <NavBar createClient={(t) => console.log(t)} />
             <Component {...pageProps} client={this.client} />
           </div>
         </Provider>
