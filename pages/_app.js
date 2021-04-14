@@ -59,6 +59,7 @@ export default class MyApp extends App {
             )}
             <NavBar setToken={(t) => this.setToken(t)} />
             <Component {...pageProps} send={(msg) => this.send(msg)} />
+
           </div>
         </Provider>
       </Container>
