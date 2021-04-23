@@ -1,99 +1,190 @@
 import React from "react";
+import axios from "axios";
 
-import css from "styled-jsx/css";
+import styles from "./authFormStyles";
 
 export default class Register extends React.PureComponent {
   constructor(props) {
     super(props);
+
+    this.userData = {
+      nickname: "",
+      username: "",
+      password: "",
+      email: "",
+      firstName: "",
+      lastName: "",
+      confirmPassword: "",
+    };
+
+    this.state = {
+      error: false,
+    };
+  }
+
+  submitButton() {
+    // console.log(this.userData);
+    axios
+      .post("http://localhost:8080/blackboard/sys/register", this.userData)
+      .then((res) => {
+        console.log(res);
+        if (res.data.code == 0) {
+          axios
+            .post("http://localhost:8080/blackboard/sys/login", {
+              username: this.userData.username,
+              password: this.userData.password,
+            })
+            .then((res) => {
+              this.setState({ error: false });
+              console.log(res.headers["blackboard-token"]);
+              this.props.setToken(res.headers["blackboard-token"]);
+              this.props.hideModal();
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        } else {
+          throw `Error Code: ${res.data.code}, \n${res.data.msg}`;
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        this.setState({ error: err });
+      });
+    // this.props.hideModal();
   }
 
   render() {
     return (
-      <div
-        className="container"
-        action="http://www.acme.com/register"
-        method="POST"
-      >
+      <div className="container">
         <h1>Register</h1>
+
+        {/* name */}
         <div className="inputContainer">
-          <label className="label" for="name">
-            Name{" "}
+          <label className="label" htmlFor="name">
+            Nickname{" "}
           </label>
           <input
             className="input"
             id="name"
             type="text"
-            autocomplete="name"
+            placeholder="Nickname"
+            onChange={(e) => {
+              this.userData.nickname = e.target.value;
+            }}
             required
           />
         </div>
+
+        {/* first name */}
         <div className="inputContainer">
-          <label className="label" for="username">
+          <label className="label" htmlFor="firstname">
+            First Name{" "}
+          </label>
+          <input
+            className="input"
+            id="firstname"
+            type="text"
+            placeholder="First name"
+            onChange={(e) => {
+              this.userData.firstName = e.target.value;
+            }}
+            required
+          />
+        </div>
+
+        {/* last name */}
+        <div className="inputContainer">
+          <label className="label" htmlFor="lastname">
+            Last Name{" "}
+          </label>
+          <input
+            className="input"
+            id="lastname"
+            type="text"
+            placeholder="Last name"
+            onChange={(e) => {
+              this.userData.lastName = e.target.value;
+            }}
+            required
+          />
+        </div>
+
+        {/* username */}
+        <div className="inputContainer">
+          <label className="label" htmlFor="username">
             Username{" "}
           </label>
           <input
             className="input"
             id="username"
             type="text"
-            autocomplete="username"
+            placeholder="Username"
+            onChange={(e) => {
+              this.userData.username = e.target.value;
+            }}
             required
           />
         </div>
+
+        {/* email */}
         <div className="inputContainer">
-          <label className="label" for="password">
+          <label className="label" htmlFor="email">
+            Email{" "}
+          </label>
+          <input
+            className="input"
+            id="email"
+            type="text"
+            placeholder="Email"
+            onChange={(e) => {
+              this.userData.email = e.target.value;
+            }}
+            required
+          />
+        </div>
+
+        {/* password */}
+        <div className="inputContainer">
+          <label className="label" htmlFor="password">
             Password{" "}
           </label>
           <input
             className="input"
             id="password"
             type="password"
-            autocomplete="password"
+            placeholder="Password"
+            onChange={(e) => {
+              this.userData.password = e.target.value;
+            }}
             required
           />
         </div>
+
+        {/* confirm password */}
         <div className="inputContainer">
-          <label className="label" for="confirmPassword">
+          <label className="label" htmlFor="confirmPassword">
             Confirm Password{" "}
           </label>
           <input
             className="input"
             id="confirmPassword"
             type="password"
-            autocomplete="confirmPassword"
+            placeholder="Confirm Password"
+            onChange={(e) => {
+              this.userData.confirmPassword = e.target.value;
+            }}
             required
           />
         </div>
-        <div className="inputContainer">
-          <button>Register</button>
+        <div className="doneButton">
+          <button onClick={() => this.submitButton()}>Register</button>
         </div>
+        {this.state.error ? (
+          <div className="error">{this.state.error}</div>
+        ) : null}
         <style jsx>{styles}</style>
       </div>
     );
   }
 }
-
-const styles = css`
-  .container {
-    flex-direction: column;
-    align-items: center;
-    align-content: center;
-  }
-
-  .inputContainer {
-    width: 80%;
-
-    flex-direction: row;
-    align-items: flex-end;
-    margin: 10px auto;
-  }
-
-  .label {
-    width: 50%;
-  }
-
-  .input {
-    /* float: right; */
-    align-self: flex-end;
-    width: 50%;
-  }
-`;

@@ -6,6 +6,8 @@ import css from "styled-jsx/css";
 
 import AuthModal from "../auth/authModal";
 
+import cookieCutter from "cookie-cutter";
+
 class Navbar extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -19,9 +21,9 @@ class Navbar extends React.PureComponent {
 
   openModal(state) {
     // this.props.createClient("test");
-    this.props.setToken("12314");
-    console.log("token set");
-    // this.modal.current.openModal(state);
+    // this.props.setToken("12314");
+    // console.log("token set");
+    this.modal.current.openModal(state);
   }
 
   render() {
@@ -39,8 +41,28 @@ class Navbar extends React.PureComponent {
               <UserOutlined />
             </a>
             <div className="dropdown-content">
-              <a onClick={() => this.openModal("login")}>Login</a>
-              <a onClick={() => this.openModal("register")}>Register</a>
+              {this.props.token == null ? (
+                [
+                  <a key="login" onClick={() => this.openModal("login")}>
+                    Login
+                  </a>,
+                  <a key="register" onClick={() => this.openModal("register")}>
+                    Register
+                  </a>,
+                ]
+              ) : (
+                <a
+                  onClick={() => {
+                    console.log("logout");
+                    cookieCutter.set("blackboard-token", "", {
+                      expires: new Date(0),
+                    });
+                    this.props.setToken(null);
+                  }}
+                >
+                  Logout
+                </a>
+              )}
             </div>
           </li>
         </ul>
