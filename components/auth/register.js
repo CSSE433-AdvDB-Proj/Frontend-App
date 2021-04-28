@@ -22,36 +22,31 @@ export default class Register extends React.PureComponent {
     };
   }
 
-  submitButton() {
+  async submitButton() {
     // console.log(this.userData);
-    axios
-      .post("http://localhost:8080/blackboard/sys/register", this.userData)
-      .then((res) => {
-        console.log(res);
-        if (res.data.code == 0) {
-          axios
-            .post("http://localhost:8080/blackboard/sys/login", {
-              username: this.userData.username,
-              password: this.userData.password,
-            })
-            .then((res) => {
-              this.setState({ error: false });
-              console.log(res.headers["blackboard-token"]);
-              this.props.setToken(res.headers["blackboard-token"]);
-              this.props.hideModal();
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        } else {
-          throw `Error Code: ${res.data.code}, \n${res.data.msg}`;
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        this.setState({ error: err });
-      });
-    // this.props.hideModal();
+    try {
+      const registerRes = await axios.post(
+        "http://localhost:8080/blackboard/sys/register",
+        this.userData
+      );
+
+      if (registerRes.data.code != 0) {
+        throw `Error Code: ${registerRes.data.code}, \n${registerRes.data.msg}`;
+      }
+
+      const loginRes = await axios.post(
+        "http://localhost:8080/blackboard/sys/login",
+        this.userData
+      );
+
+      this.setState({ error: false });
+      console.log(loginRes.headers["blackboard-token"]);
+      this.props.setToken(loginRes.headers["blackboard-token"]);
+      this.props.hideModal();
+    } catch (err) {
+      console.log(err);
+      this.setState({ error: err });
+    }
   }
 
   render() {

@@ -1,12 +1,26 @@
 /*  ./components/Navbar.jsx     */
 import Link from "next/link";
 import React from "react";
-import { UserOutlined } from "@ant-design/icons";
+import { UserOutlined, MessageOutlined } from "@ant-design/icons";
 import css from "styled-jsx/css";
+import axios from "axios";
+import cookieCutter from "cookie-cutter";
+import { connect } from "react-redux";
 
 import AuthModal from "../auth/authModal";
 
-import cookieCutter from "cookie-cutter";
+const mapStateToProps = (state) => {
+  return {
+    token: state.authReducer.token,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {};
+};
+
+const SEARCHFRIEND = "Search Friend";
+const ADDUSER = "Add User";
 
 class Navbar extends React.PureComponent {
   constructor(props) {
@@ -16,6 +30,7 @@ class Navbar extends React.PureComponent {
 
     this.state = {
       expandProfile: false,
+      search: SEARCHFRIEND,
     };
   }
 
@@ -24,6 +39,27 @@ class Navbar extends React.PureComponent {
     // this.props.setToken("12314");
     // console.log("token set");
     this.modal.current.openModal(state);
+  }
+
+  toggleSearch() {
+    if (this.state.search == SEARCHFRIEND) {
+      this.setState({ search: ADDUSER });
+    } else {
+      this.setState({ search: SEARCHFRIEND });
+    }
+  }
+
+  async logout() {
+    await axios.post(
+      "http://localhost:8080/blackboard/account/logout",
+      {},
+      {
+        headers: {
+          "Blackboard-Token": this.props.token,
+        },
+      }
+    );
+    this.props.setToken(null);
   }
 
   render() {
@@ -36,11 +72,16 @@ class Navbar extends React.PureComponent {
           <li>
             <a href="/demo/demo">Demo</a>
           </li>
-          <li className="rightli dropdown">
-            <a className="dropbtn">
+          <li>
+            <div className="searchLabel" onClick={() => this.toggleSearch()}>
+              {this.state.search}
+            </div>
+          </li>
+          <li className="rightli authDropContainer">
+            <a className="authDropBtn">
               <UserOutlined />
             </a>
-            <div className="dropdown-content">
+            <div className="authDropContent">
               {this.props.token == null ? (
                 [
                   <a key="login" onClick={() => this.openModal("login")}>
@@ -53,17 +94,18 @@ class Navbar extends React.PureComponent {
               ) : (
                 <a
                   onClick={() => {
-                    console.log("logout");
-                    cookieCutter.set("blackboard-token", "", {
-                      expires: new Date(0),
-                    });
-                    this.props.setToken(null);
+                    this.logout();
                   }}
                 >
                   Logout
                 </a>
               )}
             </div>
+          </li>
+          <li className="rightli notiDropContainer">
+            <a className="">
+              <MessageOutlined />
+            </a>
           </li>
         </ul>
         <AuthModal ref={this.modal} setToken={(t) => this.props.setToken(t)} />
@@ -72,6 +114,8 @@ class Navbar extends React.PureComponent {
     );
   }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Navbar);
 
 const styles = css`
   ul {
@@ -87,8 +131,13 @@ const styles = css`
     display: inline;
   }
 
+  .searchLabel {
+    width: 100%;
+  }
+
   li a,
-  .dropbtn {
+  li .searchLabel,
+  .authDropBtn {
     display: inline-block;
     color: white;
     text-align: center;
@@ -97,11 +146,12 @@ const styles = css`
   }
 
   li a:hover,
-  .dropdown:hover .dropbtn {
+  li .searchLabel:hover,
+  .authDropContainer:hover .authDropBtn {
     background-color: #111;
   }
 
-  li.dropdown {
+  li.authDropContainer {
     display: inline-block;
   }
 
@@ -109,7 +159,7 @@ const styles = css`
     float: right;
   }
 
-  .dropdown-content {
+  .authDropContent {
     display: none;
     position: absolute;
     background-color: #111;
@@ -120,7 +170,7 @@ const styles = css`
     border-radius: 0px 0px 5px 5px;
   }
 
-  .dropdown-content a {
+  .authDropContent a {
     color: white;
     padding: 2px 4px;
     padding-bottom: 4px;
@@ -130,14 +180,12 @@ const styles = css`
     border-radius: 0px 0px 5px 5px;
   }
 
-  .dropdown-content a:hover {
+  .authDropContent a:hover {
     background-color: #333;
     cursor: pointer;
   }
 
-  .dropdown:hover .dropdown-content {
+  .authDropContainer:hover .authDropContent {
     display: block;
   }
 `;
-
-export default Navbar;

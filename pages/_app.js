@@ -30,8 +30,7 @@ export default class MyApp extends App {
   componentDidMount() {
     const token = cookieCutter.get("blackboard-token");
     if (token != null) {
-      this.setState({ token });
-      this.connect(token);
+      this.setToken(token);
     }
   }
 
@@ -52,7 +51,7 @@ export default class MyApp extends App {
   }
 
   send = (msg) => {
-    if (this.state.token == null) {
+    if (this.store.getState().authReducer.token == null) {
       return;
     }
     console.log("Sending: " + msg);
@@ -65,9 +64,12 @@ export default class MyApp extends App {
 
   setToken = (token) => {
     console.log("Set token!");
-    this.setState({ token });
     cookieCutter.set("blackboard-token", token);
+    this.store.dispatch({ type: "SET_TOKEN", value: token });
     if (token == null) {
+      cookieCutter.set("blackboard-token", "", {
+        expires: new Date(0),
+      });
       this.disconnect();
     } else {
       this.connect(token);
@@ -81,23 +83,7 @@ export default class MyApp extends App {
       <Container>
         <Provider store={this.store}>
           <div>
-            {/* <div>{this.state.token}</div> */}
-            {/* {this.state.token == null ? null : (
-              <SockJsClient
-                headers={{
-                  "Blackboard-Token": this.state.token,
-                }}
-                key={this.state.token}
-                url={`http://localhost:8080/blackboard/msg`}
-                topics={["/topics/all"]}
-                onMessage={(msg) => this.onMessage(msg)}
-                ref={(client) => (this.clientRef = client)}
-              />
-            )} */}
-            <NavBar
-              setToken={(t) => this.setToken(t)}
-              token={this.state.token}
-            />
+            <NavBar setToken={(t) => this.setToken(t)} />
             <Component {...pageProps} send={(msg) => this.send(msg)} />
           </div>
         </Provider>

@@ -2,11 +2,10 @@
 import Link from "next/link";
 import React from "react";
 import css from "styled-jsx/css";
-
+import axios from "axios";
 import { CloseCircleOutlined } from "@ant-design/icons";
 
 import Register from "./register";
-
 import Login from "./login";
 
 class AuthModal extends React.PureComponent {

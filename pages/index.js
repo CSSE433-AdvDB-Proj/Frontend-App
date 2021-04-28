@@ -7,7 +7,19 @@ import css from "styled-jsx/css";
 
 import cookieCutter from "cookie-cutter";
 
-export default class Index extends React.Component {
+import { connect } from "react-redux";
+
+const mapStateToProps = (state) => {
+  return {
+    token: state.authReducer.token,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {};
+};
+
+class Index extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -31,7 +43,7 @@ export default class Index extends React.Component {
         {this.state.showToken ? (
           <div>
             <p>Token</p>
-            <p className="content"> {cookieCutter.get("blackboard-token")} </p>
+            <p className="content"> {this.props.token} </p>
           </div>
         ) : null}
         Destination{" "}
@@ -45,6 +57,7 @@ export default class Index extends React.Component {
     );
   }
 }
+export default connect(mapStateToProps, mapDispatchToProps)(Index);
 
 const styles = css`
   .container {

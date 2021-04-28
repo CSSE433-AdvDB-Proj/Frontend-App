@@ -17,26 +17,30 @@ export default class Login extends React.PureComponent {
     };
   }
 
-  submitButton() {
+  async submitButton() {
     // console.log(this.userData);
-    axios
-      .post("http://localhost:8080/blackboard/sys/login", this.userData)
-      .then((res) => {
-        console.log(res);
-        if (res.data.code == 0) {
-          console.log(res.headers["blackboard-token"]);
-          this.props.setToken(res.headers["blackboard-token"]);
-          this.setState({ error: false });
-          this.props.hideModal();
-        } else {
-          throw `Error Code: ${res.data.code}, \n${res.data.msg}`;
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        this.setState({ error: err });
-      });
-    // this.props.hideModal();
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/blackboard/sys/login",
+        this.userData
+      );
+      
+      if (res.data.code != 0) {
+        throw `Error Code: ${res.data.code}, \n${res.data.msg}`;
+      }
+
+      if (res.headers["blackboard-token"] == null) {
+        throw `Error Code: Something went wrong`;
+      }
+
+      console.log(res.headers["blackboard-token"]);
+      this.props.setToken(res.headers["blackboard-token"]);
+      this.setState({ error: false });
+      this.props.hideModal();
+    } catch (err) {
+      console.log(err);
+      this.setState({ error: err });
+    }
   }
 
   render() {
@@ -79,7 +83,7 @@ export default class Login extends React.PureComponent {
         </div>
 
         <div className="doneButton">
-          <button onClick={() => this.submitButton()}>Register</button>
+          <button onClick={() => this.submitButton()}>Login</button>
         </div>
         {this.state.error ? (
           <div className="error">{this.state.error}</div>

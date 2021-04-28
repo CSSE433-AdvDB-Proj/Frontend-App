@@ -4,6 +4,7 @@ import reduxThunk from "redux-thunk";
 import demoReducer from "./demoReducer";
 import testChatReducer from "./testChatReducer";
 import liveDemoReducer from "./liveDemoReducer";
+import authReducer from "./authReducer"
 
 const middleware = [reduxThunk];
 const getStore = (preloadState, options) => {
@@ -12,6 +13,7 @@ const getStore = (preloadState, options) => {
       demoReducer,
       testChatReducer,
       liveDemoReducer,
+      authReducer,
     }),
     applyMiddleware(...middleware)
   );
