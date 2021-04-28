@@ -1,14 +1,11 @@
-/*  ./components/Navbar.jsx     */
 import Link from "next/link";
 import React from "react";
 import css from "styled-jsx/css";
-import axios from "axios";
+
 import { CloseCircleOutlined } from "@ant-design/icons";
 
-import Register from "./register";
-import Login from "./login";
 
-class AuthModal extends React.PureComponent {
+class ChatModal extends React.PureComponent {
   constructor(props) {
     super(props);
 
@@ -30,28 +27,7 @@ class AuthModal extends React.PureComponent {
       return null;
     }
 
-    let content;
-
-    switch (this.state.state) {
-      case "register":
-        content = (
-          <Register
-            setToken={(t) => this.props.setToken(t)}
-            hideModal={() => this.hideModal()}
-          />
-        );
-        break;
-      case "login":
-        content = (
-          <Login
-            setToken={(t) => this.props.setToken(t)}
-            hideModal={() => this.hideModal()}
-          />
-        );
-        break;
-      default:
-        content = null;
-    }
+    let content = "hello " + this.state.state;
 
     return (
       <div>
@@ -115,4 +91,4 @@ const styles = css`
   }
 `;
 
-export default AuthModal;
+export default ChatModal;

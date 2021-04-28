@@ -1,39 +1,80 @@
 import React from "react";
 import { Provider } from "react-redux";
 import App from "next/app";
-import { w3cwebsocket as W3CWebSocket } from "websocket";
+
+import SockJsClient from "react-stomp";
+
+import * as Stomp from "stompjs";
+import SockJS from "sockjs-client";
 
 import getStore from "../redux/index";
 import NavBar from "../components/general/navbar";
 
 import Container from "../components/general/container";
 
+import cookieCutter from "cookie-cutter";
+
 export default class MyApp extends App {
   constructor(props) {
     super(props);
 
     this.store = getStore({});
-    // this.client = null;
 
-    // this.createClient = (token) => {
-    //   console.log(token);
-    this.client = new W3CWebSocket("ws://127.0.0.1:8000");
+    this.state = {
+      token: null,
+    };
+
+    this.client = null;
   }
 
   componentDidMount() {
-    this.client.onopen = () => {
-      console.log("WebSocket: Connected");
-    };
-    this.client.onclose = () => {
-      console.log("Websocket: Disconnected");
-    };
-    this.client.onmessage = (message) => {
-      console.log("Websocket: Received Message");
-      const dataFromServer = JSON.parse(message.data);
-      dataFromServer.fromServer = true;
-      this.store.dispatch(dataFromServer);
-    };
+    const token = cookieCutter.get("blackboard-token");
+    if (token != null) {
+      this.setToken(token);
+    }
   }
+
+  connect(token) {
+    var socket = new SockJS("http://localhost:8080/blackboard/msg");
+    this.client = Stomp.over(socket);
+    this.client.connect({ "Blackboard-Token": token }, (frame) => {
+      console.log("Connected: " + frame);
+    });
+  }
+
+  disconnect() {
+    if (this.client != null) {
+      this.client.disconnect(() => {
+        console.log("Disconnected");
+      });
+    }
+  }
+
+  send = (msg) => {
+    if (this.store.getState().authReducer.token == null) {
+      return;
+    }
+    console.log("Sending: " + msg);
+    // this.clientRef.sendMessage("/topics/all", msg);
+  };
+
+  onMessage = (msg) => {
+    console.log(msg);
+  };
+
+  setToken = (token) => {
+    console.log("Set token!");
+    cookieCutter.set("blackboard-token", token);
+    this.store.dispatch({ type: "SET_TOKEN", value: token });
+    if (token == null) {
+      cookieCutter.set("blackboard-token", "", {
+        expires: new Date(0),
+      });
+      this.disconnect();
+    } else {
+      this.connect(token);
+    }
+  };
 
   render() {
     const { Component, pageProps } = this.props;
@@ -42,8 +83,8 @@ export default class MyApp extends App {
       <Container>
         <Provider store={this.store}>
           <div>
-            <NavBar createClient={(t) => console.log(t)} />
-            <Component {...pageProps} client={this.client} />
+            <NavBar setToken={(t) => this.setToken(t)} />
+            <Component {...pageProps} send={(msg) => this.send(msg)} />
           </div>
         </Provider>
       </Container>
