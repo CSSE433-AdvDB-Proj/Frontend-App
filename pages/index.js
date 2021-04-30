@@ -13,7 +13,7 @@ const mapStateToProps = (state) => {
   return {
     token: state.authReducer.token,
     user: state.authReducer.user,
-    messages: state.messageReducer,
+    messages: state.messageReducer.messages,
   };
 };
 
@@ -40,11 +40,10 @@ class Index extends React.Component {
 
   render() {
     let token = this.props.token;
-    let user = JSON.parse(this.props.user);
+    let user = this.props.user;
     let username = user["username"];
 
-    console.log(this.props.messages)
-
+    // console.log(this.props.messages);
     return (
       <div className="container">
         <CustomHead title="Index" />
@@ -52,7 +51,13 @@ class Index extends React.Component {
           <p>Token</p>
           <p className="content"> {token} </p>
           <p className="content"> {username} </p>
-          <p className="content"> {JSON.stringify(this.props.messages)} </p>
+          <div className="content">
+            {Object.keys(this.props.messages).map((k) => {
+              return <div key={k}>{this.props.messages[k].map((v) => {
+                return <div key={v.timestamp}>{`${k}: ${v.content}`}</div>
+              })}</div>;
+            })}
+          </div>
         </div>
         Destination{" "}
         <input onChange={(e) => (this.destination = e.target.value)} />

@@ -5,11 +5,13 @@ const initialState = {
 const messageReducer = (state = initialState, action) => {
   switch (action.type) {
     case "RECEIVED_MESSAGE":
+      let messages =
+        state.messages[action.from] == null ? [] : state.messages[action.from];
       return {
         ...state,
         messages: {
           ...state.messages,
-          [action.from]: action.payload,
+          [action.from]: [...messages, action.payload],
         },
       };
     default:

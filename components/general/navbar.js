@@ -8,6 +8,7 @@ import cookieCutter from "cookie-cutter";
 import { connect } from "react-redux";
 
 import AuthModal from "../auth/authModal";
+import ChatModal from "../chat/chatModal";
 
 const mapStateToProps = (state) => {
   return {
@@ -26,19 +27,28 @@ class Navbar extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.modal = React.createRef();
+    this.authModal = React.createRef();
+    this.chatModal = React.createRef();
 
     this.state = {
       expandProfile: false,
       search: SEARCHFRIEND,
+      target: "",
     };
+
+    this.target = "";
   }
 
-  openModal(state) {
+  openChatModal(user) {
+    // console.log(user);
+    this.chatModal.current.openModal(user);
+  }
+
+  openAuthModal(state) {
     // this.props.createClient("test");
     // this.props.setToken("12314");
     // console.log("token set");
-    this.modal.current.openModal(state);
+    this.authModal.current.openModal(state);
   }
 
   toggleSearch() {
@@ -88,7 +98,13 @@ class Navbar extends React.PureComponent {
           {/* Search Input Box */}
           <li className="searchInputLi">
             <div className="searchInputContainer">
-              <input className="searchInput" />
+              <input
+                className="searchInput"
+                onChange={(e) => (this.target = e.target.value)}
+                onKeyDown={(k) =>
+                  k.keyCode == 13 ? this.openChatModal(this.target) : null
+                }
+              />
             </div>
           </li>
         </div>
@@ -109,10 +125,13 @@ class Navbar extends React.PureComponent {
             <div className="authDropContent">
               {this.props.token == null ? (
                 [
-                  <a key="login" onClick={() => this.openModal("login")}>
+                  <a key="login" onClick={() => this.openAuthModal("login")}>
                     Login
                   </a>,
-                  <a key="register" onClick={() => this.openModal("register")}>
+                  <a
+                    key="register"
+                    onClick={() => this.openAuthModal("register")}
+                  >
                     Register
                   </a>,
                 ]
@@ -128,7 +147,14 @@ class Navbar extends React.PureComponent {
             </div>
           </li>
         </div>
-        <AuthModal ref={this.modal} setToken={(t, d) => this.props.setToken(t, d)} />
+        <AuthModal
+          ref={this.authModal}
+          setToken={(t, d) => this.props.setToken(t, d)}
+        />
+        <ChatModal
+          ref={this.chatModal}
+          send={(m) => this.props.send(m)}
+        />
         <style jsx>{styles}</style>
       </nav>
     );
@@ -249,7 +275,8 @@ const styles = css`
     border-radius: 0px 0px 5px 5px;
   }
 
-  div li:hover, li a:hover {
+  div li:hover,
+  li a:hover {
     background-color: #333;
     cursor: pointer;
   }
