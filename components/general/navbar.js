@@ -19,8 +19,8 @@ const mapDispatchToProps = (dispatch) => {
   return {};
 };
 
-const SEARCHFRIEND = "Search Friend";
-const ADDUSER = "Add User";
+const SEARCHFRIEND = "Search Friend:";
+const ADDUSER = "Add User:";
 
 class Navbar extends React.PureComponent {
   constructor(props) {
@@ -64,20 +64,45 @@ class Navbar extends React.PureComponent {
 
   render() {
     return (
-      <nav>
-        <ul>
+      <nav className="container">
+        <div className="leftBar">
+          {/* Home */}
           <li>
             <a href="/">Home</a>
           </li>
+
+          {/* Demo */}
           <li>
             <a href="/demo/demo">Demo</a>
           </li>
-          <li>
+        </div>
+
+        <div className="centerBar">
+          {/* Search friend/ add user label */}
+          <li className="searchLabelLi">
             <div className="searchLabel" onClick={() => this.toggleSearch()}>
               {this.state.search}
             </div>
           </li>
-          <li className="rightli authDropContainer">
+
+          {/* Search Input Box */}
+          <li className="searchInputLi">
+            <div className="searchInputContainer">
+              <input className="searchInput" />
+            </div>
+          </li>
+        </div>
+
+        <div className="rightBar">
+          {/* Notification Icon */}
+          <li className="notiDropContainer">
+            <a className="notiDropBtn">
+              <MessageOutlined />
+            </a>
+          </li>
+
+          {/* Profile Icon */}
+          <li className="authDropContainer">
             <a className="authDropBtn">
               <UserOutlined />
             </a>
@@ -102,13 +127,8 @@ class Navbar extends React.PureComponent {
               )}
             </div>
           </li>
-          <li className="rightli notiDropContainer">
-            <a className="">
-              <MessageOutlined />
-            </a>
-          </li>
-        </ul>
-        <AuthModal ref={this.modal} setToken={(t) => this.props.setToken(t)} />
+        </div>
+        <AuthModal ref={this.modal} setToken={(t, d) => this.props.setToken(t, d)} />
         <style jsx>{styles}</style>
       </nav>
     );
@@ -118,21 +138,58 @@ class Navbar extends React.PureComponent {
 export default connect(mapStateToProps, mapDispatchToProps)(Navbar);
 
 const styles = css`
-  ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+  .container {
+    flex-direction: row;
+    /* width: 100%; */
+    justify-content: space-between;
+    text-align: center;
     background-color: #333;
   }
 
-  li {
-    float: left;
-    display: inline;
+  .leftBar,
+  .centerBar,
+  .rightBar {
+    height: 100%;
+    /* list-style-type: none; */
+    margin: 0;
+    padding: 0;
+    /* overflow: hidden; */
+    display: inline-block;
+    /* display: flex; */
+    /* justify-content: center !important; */
+    /* text-align: center; */
+    /* text-align: center;
+    justify-content: space-between; */
   }
 
-  .searchLabel {
-    width: 100%;
+  .leftBar {
+    float: left;
+  }
+
+  .rightBar {
+    float: right;
+  }
+
+  li {
+    display: inline;
+    align-items: center;
+  }
+
+  .stretch {
+    flex: 1;
+  }
+
+  .searchInputLi {
+    display: inline;
+    align-items: center;
+    /* background-color: green; */
+    float: none;
+    /* align-self: center !important; */
+  }
+
+  .searchInputLi div {
+    display: inline-block;
+    color: white;
   }
 
   li a,
@@ -143,6 +200,18 @@ const styles = css`
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
+  }
+
+  li .searchInputContainer {
+    flex-direction: row;
+    display: inline-block;
+    padding: 14px 16px;
+    /* background-color: green; */
+  }
+
+  .searchInputContainer .searchText {
+    color: black !important;
+    text-align: center;
   }
 
   li a:hover,
@@ -156,7 +225,7 @@ const styles = css`
   }
 
   .rightli {
-    float: right;
+    /* float: right; */
   }
 
   .authDropContent {
@@ -180,7 +249,7 @@ const styles = css`
     border-radius: 0px 0px 5px 5px;
   }
 
-  .authDropContent a:hover {
+  div li:hover, li a:hover {
     background-color: #333;
     cursor: pointer;
   }

@@ -24,7 +24,7 @@ export default class Login extends React.PureComponent {
         "http://localhost:8080/blackboard/sys/login",
         this.userData
       );
-      
+
       if (res.data.code != 0) {
         throw `Error Code: ${res.data.code}, \n${res.data.msg}`;
       }
@@ -33,8 +33,9 @@ export default class Login extends React.PureComponent {
         throw `Error Code: Something went wrong`;
       }
 
-      console.log(res.headers["blackboard-token"]);
-      this.props.setToken(res.headers["blackboard-token"]);
+      // console.log(res.headers["blackboard-token"]);
+      // console.log(res.data.data);
+      this.props.setToken(res.headers["blackboard-token"], res.data.data);
       this.setState({ error: false });
       this.props.hideModal();
     } catch (err) {

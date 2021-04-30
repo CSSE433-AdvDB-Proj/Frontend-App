@@ -39,9 +39,10 @@ export default class Register extends React.PureComponent {
         this.userData
       );
 
+      // console.log(loginRes.headers["blackboard-token"]);
+      // console.log(loginRes.data.data);
+      this.props.setToken(loginRes.headers["blackboard-token"], loginRes.data.data);
       this.setState({ error: false });
-      console.log(loginRes.headers["blackboard-token"]);
-      this.props.setToken(loginRes.headers["blackboard-token"]);
       this.props.hideModal();
     } catch (err) {
       console.log(err);

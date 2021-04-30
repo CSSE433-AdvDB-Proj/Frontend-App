@@ -12,6 +12,8 @@ import { connect } from "react-redux";
 const mapStateToProps = (state) => {
   return {
     token: state.authReducer.token,
+    user: state.authReducer.user,
+    messages: state.messageReducer,
   };
 };
 
@@ -37,15 +39,21 @@ class Index extends React.Component {
   }
 
   render() {
+    let token = this.props.token;
+    let user = JSON.parse(this.props.user);
+    let username = user["username"];
+
+    console.log(this.props.messages)
+
     return (
       <div className="container">
         <CustomHead title="Index" />
-        {this.state.showToken ? (
-          <div>
-            <p>Token</p>
-            <p className="content"> {this.props.token} </p>
-          </div>
-        ) : null}
+        <div>
+          <p>Token</p>
+          <p className="content"> {token} </p>
+          <p className="content"> {username} </p>
+          <p className="content"> {JSON.stringify(this.props.messages)} </p>
+        </div>
         Destination{" "}
         <input onChange={(e) => (this.destination = e.target.value)} />
         <button onClick={() => this.modal.current.openModal(this.destination)}>

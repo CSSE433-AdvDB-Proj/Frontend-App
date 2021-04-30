@@ -36,7 +36,7 @@ class AuthModal extends React.PureComponent {
       case "register":
         content = (
           <Register
-            setToken={(t) => this.props.setToken(t)}
+            setToken={(t, d) => this.props.setToken(t, d)}
             hideModal={() => this.hideModal()}
           />
         );
@@ -44,7 +44,7 @@ class AuthModal extends React.PureComponent {
       case "login":
         content = (
           <Login
-            setToken={(t) => this.props.setToken(t)}
+            setToken={(t, d) => this.props.setToken(t, d)}
             hideModal={() => this.hideModal()}
           />
         );
