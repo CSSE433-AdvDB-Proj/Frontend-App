@@ -46,7 +46,7 @@ class ChatBox extends React.Component {
             ? null
             : this.props.messages.map((rawData) => {
                 const data = rawData;
-                console.log(data);
+                // console.log(data);
                 let className = "chatItem";
                 let content;
                 if (data.self) {

@@ -7,6 +7,8 @@ import { CloseCircleOutlined } from "@ant-design/icons";
 
 import Register from "./register";
 import Login from "./login";
+import Account from "./account";
+import Password from "./password";
 
 class AuthModal extends React.PureComponent {
   constructor(props) {
@@ -48,6 +50,12 @@ class AuthModal extends React.PureComponent {
             hideModal={() => this.hideModal()}
           />
         );
+        break;
+      case "account":
+        content = <Account hideModal={() => this.hideModal()} />;
+        break;
+      case "password":
+        content = <Password hideModal={() => this.hideModal()} />;
         break;
       default:
         content = null;

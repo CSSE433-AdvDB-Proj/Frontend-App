@@ -37,6 +37,64 @@ export default class MyApp extends App {
     }
   }
 
+  handleMessage(token, username, hook) {
+    const sender = hook["chatId"];
+    const timestamp = hook["timestamp"];
+    axios
+      .post("http://localhost:8080/blackboard/message/getMessage", [hook], {
+        headers: {
+          "Blackboard-Token": token,
+        },
+      })
+      .then((res) => {
+        return res.data.data[sender];
+      })
+      .then((res) => {
+        res.forEach((msg) => {
+          this.store.dispatch({
+            type: "RECEIVED_MESSAGE",
+            from: msg.from,
+            payload: msg,
+          });
+          this.store.dispatch({
+            type: "RECEIVED_NOTIFICATION",
+            sender,
+            payload: hook,
+            header: "MESSAGE",
+            timestamp,
+          });
+        });
+      })
+      .catch((err) => {
+        console.log("Error fetching message.");
+        console.log(err);
+      });
+  }
+
+  handleFriendRequest(token, username, hook) {
+    const sender = hook["chatId"];
+    const timestamp = hook["timestamp"];
+    this.store.dispatch({
+      type: "RECEIVED_NOTIFICATION",
+      sender,
+      payload: hook,
+      header: "FRIEND_REQUEST",
+      timestamp,
+    });
+  }
+
+  handleFriendRequestAccepted(token, username, hook) {
+    const sender = hook["chatId"];
+    const timestamp = hook["timestamp"];
+    this.store.dispatch({
+      type: "RECEIVED_NOTIFICATION",
+      sender,
+      payload: hook,
+      header: "FRIEND_REQUEST_ACCEPTED",
+      timestamp,
+    });
+  }
+
   connect(token, username) {
     if (username == null || token == null) {
       console.log("TOKEN OR USERNAME EMPTY");
@@ -49,33 +107,21 @@ export default class MyApp extends App {
       console.log("Connected: " + frame);
       this.client.subscribe(`/user/${username}/personal`, (hook) => {
         hook = JSON.parse(hook.body);
-        if (hook.type == "MESSAGE") {
-          axios
-            .post(
-              "http://localhost:8080/blackboard/message/getMessage",
-              [hook],
-              {
-                headers: {
-                  "Blackboard-Token": token,
-                },
-              }
-            )
-            .then((res) => {
-              return res.data.data[hook["chatId"]];
-            })
-            .then((res) => {
-              res.forEach((msg) => {
-                this.store.dispatch({
-                  type: "RECEIVED_MESSAGE",
-                  from: msg.from,
-                  payload: msg,
-                });
-              });
-            })
-            .catch((err) => {
-              console.log("Error fetching message.");
-              console.log(err);
-            });
+        console.log("once, right");
+        console.log(hook);
+        switch (hook.type) {
+          case "MESSAGE":
+            this.handleMessage(token, username, hook);
+            break;
+          case "FRIEND_REQUEST":
+            this.handleFriendRequest(token, username, hook);
+            break;
+          case "FRIEND_REQUEST_ACCEPTED":
+            this.handleFriendRequestAccepted(token, username, hook);
+            break;
+          default:
+            console.log("Invalid notification type: " + hook.type);
+            break;
         }
       });
     });
@@ -93,8 +139,8 @@ export default class MyApp extends App {
     if (this.store.getState().authReducer.token == null) {
       return;
     }
-    console.log("Sending: ");
-    console.log(msg);
+    // console.log("Sending: ");
+    // console.log(msg);
     this.store.dispatch({
       type: "RECEIVED_MESSAGE",
       from: msg.to,

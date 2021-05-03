@@ -14,6 +14,7 @@ const mapStateToProps = (state) => {
     token: state.authReducer.token,
     user: state.authReducer.user,
     messages: state.messageReducer.messages,
+    notifications: state.notificationReducer.notifications,
   };
 };
 
@@ -51,13 +52,43 @@ class Index extends React.Component {
           <p>Token</p>
           <p className="content"> {token} </p>
           <p className="content"> {username} </p>
-          <div className="content">
+          <p className="content"> {JSON.stringify(user)} </p>
+          {/* <div className="content">
+            Messages:
             {Object.keys(this.props.messages).map((k) => {
-              return <div key={k}>{this.props.messages[k].map((v) => {
-                return <div key={v.timestamp}>{`${k}: ${v.content}`}</div>
-              })}</div>;
+              return (
+                <div key={k}>
+                  {this.props.messages[k].map((v) => {
+                    return <div key={v.timestamp}>{`${k}: ${v.content}`}</div>;
+                  })}
+                </div>
+              );
             })}
-          </div>
+          </div> */}
+          {/* <div className="content">
+            Notifications:
+            {this.props.notifications.map((k, i) => {
+              if (k.header == "MESSAGE") {
+                return (
+                  <div key={i}>
+                    <div>{`Message from: ${k.sender}`}</div>
+                    <div>{`Received on: ${k.timestamp}`}</div>
+                    <br />
+                  </div>
+                );
+              } else if (k.header == "FRIEND_REQUEST") {
+                return (
+                  <div key={i}>
+                    <div>{`Friend request from: ${k.sender}`}</div>
+                    <div>{`Received on: ${k.timestamp}`}</div>
+                    <br />
+                  </div>
+                );
+              } else {
+                return <p key={i}>Invalid notification header</p>;
+              }
+            })}
+          </div> */}
         </div>
         Destination{" "}
         <input onChange={(e) => (this.destination = e.target.value)} />

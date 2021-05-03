@@ -10,6 +10,8 @@ import { connect } from "react-redux";
 import AuthModal from "../auth/authModal";
 import ChatModal from "../chat/chatModal";
 
+import Notifications from "./notifications";
+
 const mapStateToProps = (state) => {
   return {
     token: state.authReducer.token,
@@ -39,15 +41,32 @@ class Navbar extends React.PureComponent {
     this.target = "";
   }
 
-  openChatModal(user) {
+  async enterPressed(user) {
     // console.log(user);
-    this.chatModal.current.openModal(user);
+    if (this.state.search == SEARCHFRIEND) {
+      this.chatModal.current.openModal(user);
+    } else {
+      await axios
+        .get("http://localhost:8080/blackboard/friend/send", {
+          params: { toUsername: user },
+          headers: {
+            "Blackboard-Token": this.props.token,
+          },
+        })
+        .then((res) => {
+          if (res.data.code == 0) {
+            alert(`Friend request to ${user} sent.`);
+          } else {
+            alert(res.data.msg);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   }
 
   openAuthModal(state) {
-    // this.props.createClient("test");
-    // this.props.setToken("12314");
-    // console.log("token set");
     this.authModal.current.openModal(state);
   }
 
@@ -102,7 +121,7 @@ class Navbar extends React.PureComponent {
                 className="searchInput"
                 onChange={(e) => (this.target = e.target.value)}
                 onKeyDown={(k) =>
-                  k.keyCode == 13 ? this.openChatModal(this.target) : null
+                  k.keyCode == 13 ? this.enterPressed(this.target) : null
                 }
               />
             </div>
@@ -113,8 +132,11 @@ class Navbar extends React.PureComponent {
           {/* Notification Icon */}
           <li className="notiDropContainer">
             <a className="notiDropBtn">
-              <MessageOutlined />
+              <MessageOutlined style={{ color: "white" }} />
             </a>
+            <div className="notiDropContent">
+              <Notifications />
+            </div>
           </li>
 
           {/* Profile Icon */}
@@ -123,27 +145,35 @@ class Navbar extends React.PureComponent {
               <UserOutlined />
             </a>
             <div className="authDropContent">
-              {this.props.token == null ? (
-                [
-                  <a key="login" onClick={() => this.openAuthModal("login")}>
-                    Login
-                  </a>,
-                  <a
-                    key="register"
-                    onClick={() => this.openAuthModal("register")}
-                  >
-                    Register
-                  </a>,
-                ]
-              ) : (
-                <a
-                  onClick={() => {
-                    this.logout();
-                  }}
-                >
-                  Logout
-                </a>
-              )}
+              {this.props.token == null
+                ? [
+                    <a key="login" onClick={() => this.openAuthModal("login")}>
+                      Login
+                    </a>,
+                    <a
+                      key="register"
+                      onClick={() => this.openAuthModal("register")}
+                    >
+                      Register
+                    </a>,
+                  ]
+                : [
+                    <a
+                      key="account"
+                      onClick={() => this.openAuthModal("account")}
+                    >
+                      Account
+                    </a>,
+                    <a
+                      key="password"
+                      onClick={() => this.openAuthModal("password")}
+                    >
+                      Security
+                    </a>,
+                    <a key="logout" onClick={() => this.logout()}>
+                      Logout
+                    </a>,
+                  ]}
             </div>
           </li>
         </div>
@@ -151,10 +181,7 @@ class Navbar extends React.PureComponent {
           ref={this.authModal}
           setToken={(t, d) => this.props.setToken(t, d)}
         />
-        <ChatModal
-          ref={this.chatModal}
-          send={(m) => this.props.send(m)}
-        />
+        <ChatModal ref={this.chatModal} send={(m) => this.props.send(m)} />
         <style jsx>{styles}</style>
       </nav>
     );
@@ -220,7 +247,8 @@ const styles = css`
 
   li a,
   li .searchLabel,
-  .authDropBtn {
+  .authDropBtn,
+  .notiDropBtn {
     display: inline-block;
     color: white;
     text-align: center;
@@ -242,11 +270,13 @@ const styles = css`
 
   li a:hover,
   li .searchLabel:hover,
-  .authDropContainer:hover .authDropBtn {
+  .authDropContainer:hover .authDropBtn,
+  .notiDropContainer:hover .notiDropBtn {
     background-color: #111;
   }
 
-  li.authDropContainer {
+  li.authDropContainer,
+  li.notiDropContainer {
     display: inline-block;
   }
 
@@ -254,18 +284,20 @@ const styles = css`
     /* float: right; */
   }
 
-  .authDropContent {
+  .authDropContent,
+  .notiDropContent {
     display: none;
     position: absolute;
     background-color: #111;
-    min-width: 80px;
+    min-width: 100px;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
     right: 0;
     border-radius: 0px 0px 5px 5px;
   }
 
-  .authDropContent a {
+  .authDropContent a,
+  .notiDropContent a {
     color: white;
     padding: 2px 4px;
     padding-bottom: 4px;
@@ -281,7 +313,8 @@ const styles = css`
     cursor: pointer;
   }
 
-  .authDropContainer:hover .authDropContent {
+  .authDropContainer:hover .authDropContent,
+  .notiDropContainer:hover .notiDropContent {
     display: block;
   }
 `;

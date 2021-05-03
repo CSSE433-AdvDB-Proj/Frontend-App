@@ -6,6 +6,7 @@ import testChatReducer from "./testChatReducer";
 import liveDemoReducer from "./liveDemoReducer";
 import authReducer from "./authReducer";
 import messageReducer from "./messageReducer";
+import notificationReducer from "./notificationReducer";
 
 
 const middleware = [reduxThunk];
@@ -17,6 +18,7 @@ const getStore = (preloadState, options) => {
       liveDemoReducer,
       authReducer,
       messageReducer,
+      notificationReducer,
     }),
     applyMiddleware(...middleware)
   );
