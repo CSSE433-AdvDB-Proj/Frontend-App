@@ -9,7 +9,7 @@ class NotificationCard extends React.PureComponent {
 
   render() {
     return (
-      <div className="container">
+      <div className="container" onClick={this.props.onPress}>
         <div className="header">{this.props.header}</div>
         {this.props.texts.map((t, i) => {
           return (

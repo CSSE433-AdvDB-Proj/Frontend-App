@@ -9,17 +9,21 @@ import { connect } from "react-redux";
 
 import AuthModal from "../auth/authModal";
 import ChatModal from "../chat/chatModal";
+import FriendModal from "./friendModal";
 
 import Notifications from "./notifications";
 
 const mapStateToProps = (state) => {
   return {
     token: state.authReducer.token,
+    notifications: state.notificationReducer.notifications,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return {};
+  return {
+    dispatch: dispatch,
+  };
 };
 
 const SEARCHFRIEND = "Search Friend:";
@@ -31,6 +35,7 @@ class Navbar extends React.PureComponent {
 
     this.authModal = React.createRef();
     this.chatModal = React.createRef();
+    this.friendModal = React.createRef();
 
     this.state = {
       expandProfile: false,
@@ -41,12 +46,31 @@ class Navbar extends React.PureComponent {
     this.target = "";
   }
 
-  async enterPressed(user) {
+  enterPressed(user, forceFriend = false) {
     // console.log(user);
-    if (this.state.search == SEARCHFRIEND) {
-      this.chatModal.current.openModal(user);
+    if (forceFriend || this.state.search == SEARCHFRIEND) {
+      axios
+        .get("http://localhost:8080/blackboard/friend/search_friend", {
+          params: { likeUsername: user },
+          headers: {
+            "Blackboard-Token": this.props.token,
+          },
+        })
+        .then((res) => {
+          if (res.data.code != 0) {
+            throw "Error searching friend: " + res.data.msg;
+          }
+          if (res.data.data.length == 0) {
+            alert("Friend not found: " + user);
+          }
+
+          this.chatModal.current.openModal(res.data.data[0].username);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     } else {
-      await axios
+      axios
         .get("http://localhost:8080/blackboard/friend/send", {
           params: { toUsername: user },
           headers: {
@@ -89,20 +113,30 @@ class Navbar extends React.PureComponent {
       }
     );
     this.props.setToken(null);
+    this.props.dispatch({ type: "LOGOUT" });
   }
 
   render() {
+    let displayNotifications =
+      this.props.notifications.length != 0 ? "red" : "white";
     return (
       <nav className="container">
         <div className="leftBar">
           {/* Home */}
           <li>
-            <a href="/">Home</a>
+            <a className="navbarItem" href="/">
+              Home
+            </a>
           </li>
 
           {/* Demo */}
           <li>
-            <a href="/demo/demo">Demo</a>
+            <div
+              className="navbarItem"
+              onClick={() => this.friendModal.current.openModal()}
+            >
+              Friends
+            </div>
           </li>
         </div>
 
@@ -132,10 +166,12 @@ class Navbar extends React.PureComponent {
           {/* Notification Icon */}
           <li className="notiDropContainer">
             <a className="notiDropBtn">
-              <MessageOutlined style={{ color: "white" }} />
+              <MessageOutlined style={{ color: displayNotifications }} />
             </a>
             <div className="notiDropContent">
-              <Notifications />
+              <Notifications
+                openChat={(user) => this.enterPressed(user, true)}
+              />
             </div>
           </li>
 
@@ -182,6 +218,11 @@ class Navbar extends React.PureComponent {
           setToken={(t, d) => this.props.setToken(t, d)}
         />
         <ChatModal ref={this.chatModal} send={(m) => this.props.send(m)} />
+        <FriendModal
+          ref={this.friendModal}
+          token={this.props.token}
+          openChat={(user) => this.enterPressed(user, true)}
+        />
         <style jsx>{styles}</style>
       </nav>
     );
@@ -245,8 +286,8 @@ const styles = css`
     color: white;
   }
 
-  li a,
-  li .searchLabel,
+  .navbarItem,
+  .searchLabel,
   .authDropBtn,
   .notiDropBtn {
     display: inline-block;
@@ -268,11 +309,14 @@ const styles = css`
     text-align: center;
   }
 
-  li a:hover,
-  li .searchLabel:hover,
+  .searchLabel:hover,
   .authDropContainer:hover .authDropBtn,
   .notiDropContainer:hover .notiDropBtn {
     background-color: #111;
+  }
+
+  .navbarItem:hover {
+    background-color: #111 !important;
   }
 
   li.authDropContainer,

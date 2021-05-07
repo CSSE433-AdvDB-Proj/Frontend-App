@@ -31,8 +31,11 @@ class Notifications extends React.Component {
                 return (
                   <NotificationCard
                     key={k.timestamp}
-                    header="Message:"
+                    header={"Messages: " + k.count}
                     texts={["From: " + k.sender]}
+                    onPress={() => {
+                      this.props.openChat(k.sender);
+                    }}
                   />
                 );
 

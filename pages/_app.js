@@ -2,8 +2,6 @@ import React from "react";
 import { Provider } from "react-redux";
 import App from "next/app";
 
-import SockJsClient from "react-stomp";
-
 import * as Stomp from "stompjs";
 import SockJS from "sockjs-client";
 import axios from "axios";
@@ -27,14 +25,78 @@ export default class MyApp extends App {
 
     this.client = null;
   }
+  async pullUnread(token) {
+    try {
+      const rawMessages = await axios.post(
+        "http://localhost:8080/blackboard/message/getOfflineMessage",
+        {},
+        {
+          headers: {
+            "Blackboard-Token": token,
+          },
+        }
+      );
+      const { code, msg, data } = rawMessages.data;
+      if (code != 0) {
+        throw `Status: ${code}, ${msg}`;
+      }
 
-  componentDidMount() {
+      const toFetch = [];
+
+      Object.keys(data).forEach((sender) => {
+        data[sender].forEach((msg) => {
+          toFetch.push({
+            timestamp: msg.timestamp,
+            chatId: sender,
+          });
+        });
+      });
+
+      if (toFetch.length == 0) {
+        return;
+      }
+
+      const messages = await axios.post(
+        "http://localhost:8080/blackboard/message/getMessage",
+        toFetch,
+        {
+          headers: {
+            "Blackboard-Token": token,
+          },
+        }
+      );
+
+      // console.log(messages);
+      Object.keys(messages.data.data).forEach((sender) => {
+        messages.data.data[sender].forEach((msg) => {
+          this.store.dispatch({
+            type: "RECEIVED_MESSAGE",
+            from: msg.from,
+            payload: msg,
+          });
+          this.store.dispatch({
+            type: "RECEIVED_NOTIFICATION",
+            sender,
+            payload: msg,
+            header: "MESSAGE",
+            timestamp: msg.timestamp,
+          });
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async componentDidMount() {
     const token = cookieCutter.get("blackboard-token");
     const data = cookieCutter.get("user-data");
 
-    if (token != null && data != null) {
-      this.setToken(token, JSON.parse(data));
+    if (token == null || data == null) {
+      return;
     }
+
+    this.setToken(token, JSON.parse(data));
   }
 
   handleMessage(token, username, hook) {
@@ -59,7 +121,7 @@ export default class MyApp extends App {
           this.store.dispatch({
             type: "RECEIVED_NOTIFICATION",
             sender,
-            payload: hook,
+            payload: msg,
             header: "MESSAGE",
             timestamp,
           });
@@ -103,8 +165,9 @@ export default class MyApp extends App {
     var socket = new SockJS("http://localhost:8080/blackboard/msg");
     this.client = Stomp.over(socket);
     this.client.debug = () => {};
-    this.client.connect({ "Blackboard-Token": token }, (frame) => {
+    this.client.connect({ "Blackboard-Token": token }, async (frame) => {
       console.log("Connected: " + frame);
+      await this.pullUnread(token);
       this.client.subscribe(`/user/${username}/personal`, (hook) => {
         hook = JSON.parse(hook.body);
         console.log("once, right");
@@ -158,6 +221,7 @@ export default class MyApp extends App {
   };
 
   setToken = (token, data) => {
+    this.store.dispatch({ type: "LOGIN" });
     if (token == null) {
       this.store.dispatch({ type: "SET_TOKEN", value: null });
       this.store.dispatch({ type: "SET_USER", payload: {} });
