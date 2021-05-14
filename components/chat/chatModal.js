@@ -17,11 +17,15 @@ class ChatModal extends React.PureComponent {
       target: null,
     };
   }
-  openModal(target) {
-    this.setState({ showModal: true, target });
+  openModal(target, group = false) {
+    this.setState({ showModal: true, target, group });
   }
   hideModal() {
-    this.setState({ showModal: false, closeButtonColor: "black" });
+    this.setState({
+      showModal: false,
+      closeButtonColor: "black",
+      group: false,
+    });
   }
 
   render() {
@@ -50,9 +54,10 @@ class ChatModal extends React.PureComponent {
             <div className="modalBody">
               <ChatBox
                 target={this.state.target}
+                group={this.state.group}
                 key={this.state.target}
-                send={(m) => this.props.send(m)}
-                />
+                send={(m, p) => this.props.send(m, p)}
+              />
             </div>
           </div>
         </div>

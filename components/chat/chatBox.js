@@ -2,15 +2,22 @@ import React from "react";
 import { connect } from "react-redux";
 import css from "styled-jsx/css";
 
+import { getMessageHistory } from "../../redux/messageReducer";
+
 const mapStateToProps = (state, props) => {
   return {
     messages: state.messageReducer.messages[props.target],
     user: state.authReducer.user,
+    token: state.authReducer.token,
+    timestamp: state.messageReducer.timestamps[props.target],
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return {};
+  return {
+    getMessageHistory: (from, token, lastTimestamp) =>
+      getMessageHistory(from, token, lastTimestamp)(dispatch),
+  };
 };
 
 class ChatBox extends React.Component {
@@ -22,6 +29,17 @@ class ChatBox extends React.Component {
       content: "",
     };
   }
+  componentDidMount() {
+    this.fetchMessages();
+  }
+
+  fetchMessages() {
+    this.props.getMessageHistory(
+      this.props.target,
+      this.props.token,
+      this.props.timestamp
+    );
+  }
 
   onChange(e) {
     this.setState({ content: e.target.value });
@@ -29,6 +47,18 @@ class ChatBox extends React.Component {
 
   sendMessage() {
     this.setState({ content: "" });
+    if (this.props.group == true) {
+      this.props.send(
+        {
+          from: this.props.user.username,
+          to: this.props.target,
+          sender: this.props.target,
+          content: this.state.content,
+        },
+        "/toGroup"
+      );
+      return;
+    }
     this.props.send({
       from: this.props.user.username,
       to: this.props.target,
@@ -37,9 +67,16 @@ class ChatBox extends React.Component {
   }
 
   render() {
+    let target = this.props.target;
+    if (this.props.group == true) {
+      target = "Group";
+    }
     return (
       <div className="chatBox">
-        <div>{this.props.target}</div>
+        <div>{target}</div>
+        <button className="loadMore" onClick={() => this.fetchMessages()}>
+          Load more messages
+        </button>
         {/* read message logic */}
         <div className="messages">
           {this.props.messages == null

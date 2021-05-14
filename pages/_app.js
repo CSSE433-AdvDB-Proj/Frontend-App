@@ -100,6 +100,7 @@ export default class MyApp extends App {
   }
 
   handleMessage(token, username, hook) {
+    console.log(hook);
     const sender = hook["chatId"];
     const timestamp = hook["timestamp"];
     axios
@@ -109,13 +110,15 @@ export default class MyApp extends App {
         },
       })
       .then((res) => {
-        return res.data.data[sender];
+        console.log(res);
+        return res.data.data[Object.keys(res.data.data)[0]];
       })
       .then((res) => {
         res.forEach((msg) => {
           this.store.dispatch({
             type: "RECEIVED_MESSAGE",
             from: msg.from,
+            sender,
             payload: msg,
           });
           this.store.dispatch({
@@ -157,6 +160,24 @@ export default class MyApp extends App {
     });
   }
 
+  handleHook(token, username, hook, isGroup = false) {
+    hook = JSON.parse(hook.body);
+    switch (hook.type) {
+      case "MESSAGE":
+        this.handleMessage(token, username, hook);
+        break;
+      case "FRIEND_REQUEST":
+        this.handleFriendRequest(token, username, hook);
+        break;
+      case "FRIEND_REQUEST_ACCEPTED":
+        this.handleFriendRequestAccepted(token, username, hook);
+        break;
+      default:
+        console.log("Invalid notification type: " + hook.type);
+        break;
+    }
+  }
+
   connect(token, username) {
     if (username == null || token == null) {
       console.log("TOKEN OR USERNAME EMPTY");
@@ -168,24 +189,11 @@ export default class MyApp extends App {
     this.client.connect({ "Blackboard-Token": token }, async (frame) => {
       console.log("Connected: " + frame);
       await this.pullUnread(token);
+      this.client.subscribe(`/user/${username}/group`, (hook) => {
+        this.handleHook(token, username, hook, true);
+      });
       this.client.subscribe(`/user/${username}/personal`, (hook) => {
-        hook = JSON.parse(hook.body);
-        console.log("once, right");
-        console.log(hook);
-        switch (hook.type) {
-          case "MESSAGE":
-            this.handleMessage(token, username, hook);
-            break;
-          case "FRIEND_REQUEST":
-            this.handleFriendRequest(token, username, hook);
-            break;
-          case "FRIEND_REQUEST_ACCEPTED":
-            this.handleFriendRequestAccepted(token, username, hook);
-            break;
-          default:
-            console.log("Invalid notification type: " + hook.type);
-            break;
-        }
+        this.handleHook(token, username, hook);
       });
     });
   }
@@ -198,7 +206,7 @@ export default class MyApp extends App {
     }
   }
 
-  send = (msg) => {
+  send = (msg, path = "/toUser") => {
     if (this.store.getState().authReducer.token == null) {
       return;
     }
@@ -207,13 +215,10 @@ export default class MyApp extends App {
     this.store.dispatch({
       type: "RECEIVED_MESSAGE",
       from: msg.to,
+      sender: msg.sender,
       payload: { ...msg, timestamp: new Date().getTime(), self: true },
     });
-    this.client.send(
-      "/toUser",
-      {},
-      JSON.stringify({ ...msg, type: "message" })
-    );
+    this.client.send(path, {}, JSON.stringify({ ...msg, type: "message" }));
   };
 
   onMessage = (msg) => {
@@ -254,9 +259,9 @@ export default class MyApp extends App {
           <div>
             <NavBar
               setToken={(t, d) => this.setToken(t, d)}
-              send={(m) => this.send(m)}
+              send={(m, p) => this.send(m, p)}
             />
-            <Component {...pageProps} send={(msg) => this.send(msg)} />
+            <Component {...pageProps} send={(m, p) => this.send(m, p)} />
           </div>
         </Provider>
       </Container>

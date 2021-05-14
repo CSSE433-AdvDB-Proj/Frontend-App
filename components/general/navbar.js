@@ -28,6 +28,7 @@ const mapDispatchToProps = (dispatch) => {
 
 const SEARCHFRIEND = "Search Friend:";
 const ADDUSER = "Add User:";
+const SEARCHGROUP = "Search Group:";
 
 class Navbar extends React.PureComponent {
   constructor(props) {
@@ -49,27 +50,31 @@ class Navbar extends React.PureComponent {
   enterPressed(user, forceFriend = false) {
     // console.log(user);
     if (forceFriend || this.state.search == SEARCHFRIEND) {
-      axios
-        .get("http://localhost:8080/blackboard/friend/search_friend", {
-          params: { likeUsername: user },
-          headers: {
-            "Blackboard-Token": this.props.token,
-          },
-        })
-        .then((res) => {
-          if (res.data.code != 0) {
-            throw "Error searching friend: " + res.data.msg;
-          }
-          if (res.data.data.length == 0) {
-            alert("Friend not found: " + user);
-          }
+      this.chatModal.current.openModal(user);
 
-          this.chatModal.current.openModal(res.data.data[0].username);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
+      // axios
+      //   .get("http://localhost:8080/blackboard/friend/search_friend", {
+      //     params: { likeUsername: user },
+      //     headers: {
+      //       "Blackboard-Token": this.props.token,
+      //     },
+      //   })
+      //   .then((res) => {
+      //     if (res.data.code != 0) {
+      //       throw "Error searching friend: " + res.data.msg;
+      //     }
+      //     if (res.data.data.length == 0) {
+      //       alert("Friend not found: " + user);
+      //     }
+
+      // this.chatModal.current.openModal(res.data.data[0].username);
+      // })
+      // .catch((err) => {
+      //   console.log(err);
+      // });
+    } else if (this.state.search == SEARCHGROUP) {
+      this.chatModal.current.openModal(user, true);
+    } else if (this.state.search == ADDUSER) {
       axios
         .get("http://localhost:8080/blackboard/friend/send", {
           params: { toUsername: user },
@@ -97,7 +102,9 @@ class Navbar extends React.PureComponent {
   toggleSearch() {
     if (this.state.search == SEARCHFRIEND) {
       this.setState({ search: ADDUSER });
-    } else {
+    } else if (this.state.search == ADDUSER) {
+      this.setState({ search: SEARCHGROUP });
+    } else if (this.state.search == SEARCHGROUP) {
       this.setState({ search: SEARCHFRIEND });
     }
   }
@@ -217,7 +224,7 @@ class Navbar extends React.PureComponent {
           ref={this.authModal}
           setToken={(t, d) => this.props.setToken(t, d)}
         />
-        <ChatModal ref={this.chatModal} send={(m) => this.props.send(m)} />
+        <ChatModal ref={this.chatModal} send={(m, p) => this.props.send(m, p)} />
         <FriendModal
           ref={this.friendModal}
           token={this.props.token}

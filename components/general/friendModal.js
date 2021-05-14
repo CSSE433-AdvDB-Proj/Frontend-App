@@ -60,11 +60,15 @@ class FriendModal extends React.PureComponent {
     }
 
     let content;
-
+    let contains = [];
     if (this.opening) {
       content = <div></div>;
     } else {
       content = this.state.friends.map((friend) => {
+        if (contains.includes(friend.username)) {
+          return null;
+        }
+        contains.push(friend.username);
         return (
           <div
             className="friend"
