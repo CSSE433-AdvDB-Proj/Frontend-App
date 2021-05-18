@@ -72,11 +72,12 @@ export default class MyApp extends App {
           this.store.dispatch({
             type: "RECEIVED_MESSAGE",
             from: msg.from,
+            chat: sender,
             payload: msg,
           });
           this.store.dispatch({
             type: "RECEIVED_NOTIFICATION",
-            sender,
+            from: sender,
             payload: msg,
             header: "MESSAGE",
             timestamp: msg.timestamp,
@@ -100,9 +101,9 @@ export default class MyApp extends App {
   }
 
   handleMessage(token, username, hook) {
-    console.log(hook);
-    const sender = hook["chatId"];
+    const chat = hook["chatId"];
     const timestamp = hook["timestamp"];
+    const isGroupChat = hook["isGroupChat"];
     axios
       .post("http://localhost:8080/blackboard/message/getMessage", [hook], {
         headers: {
@@ -110,7 +111,7 @@ export default class MyApp extends App {
         },
       })
       .then((res) => {
-        console.log(res);
+        // console.log(res);
         return res.data.data[Object.keys(res.data.data)[0]];
       })
       .then((res) => {
@@ -118,14 +119,15 @@ export default class MyApp extends App {
           this.store.dispatch({
             type: "RECEIVED_MESSAGE",
             from: msg.from,
-            sender,
+            chat: chat,
             payload: msg,
           });
           this.store.dispatch({
             type: "RECEIVED_NOTIFICATION",
-            sender,
+            from: chat,
             payload: msg,
             header: "MESSAGE",
+            isGroupChat: isGroupChat,
             timestamp,
           });
         });
@@ -141,26 +143,27 @@ export default class MyApp extends App {
     const timestamp = hook["timestamp"];
     this.store.dispatch({
       type: "RECEIVED_NOTIFICATION",
-      sender,
+      from: sender,
       payload: hook,
       header: "FRIEND_REQUEST",
       timestamp,
     });
   }
 
-  handleFriendRequestAccepted(token, username, hook) {
+  handleGeneric(token, username, hook) {
     const sender = hook["chatId"];
     const timestamp = hook["timestamp"];
     this.store.dispatch({
       type: "RECEIVED_NOTIFICATION",
-      sender,
+      from: sender,
       payload: hook,
-      header: "FRIEND_REQUEST_ACCEPTED",
+      header: hook.type,
       timestamp,
     });
   }
 
   handleHook(token, username, hook, isGroup = false) {
+    console.log(hook)
     hook = JSON.parse(hook.body);
     switch (hook.type) {
       case "MESSAGE":
@@ -169,11 +172,8 @@ export default class MyApp extends App {
       case "FRIEND_REQUEST":
         this.handleFriendRequest(token, username, hook);
         break;
-      case "FRIEND_REQUEST_ACCEPTED":
-        this.handleFriendRequestAccepted(token, username, hook);
-        break;
       default:
-        console.log("Invalid notification type: " + hook.type);
+        this.handleGeneric(token, username, hook);
         break;
     }
   }
@@ -215,7 +215,7 @@ export default class MyApp extends App {
     this.store.dispatch({
       type: "RECEIVED_MESSAGE",
       from: msg.to,
-      sender: msg.sender,
+      chat: msg.chat,
       payload: { ...msg, timestamp: new Date().getTime(), self: true },
     });
     this.client.send(path, {}, JSON.stringify({ ...msg, type: "message" }));

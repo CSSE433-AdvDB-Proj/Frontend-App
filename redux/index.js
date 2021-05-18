@@ -7,7 +7,7 @@ import liveDemoReducer from "./liveDemoReducer";
 import authReducer from "./authReducer";
 import messageReducer from "./messageReducer";
 import notificationReducer from "./notificationReducer";
-
+import profileReducer from "./profileReducer";
 
 const middleware = [reduxThunk];
 const getStore = (preloadState, options) => {
@@ -19,6 +19,7 @@ const getStore = (preloadState, options) => {
       authReducer,
       messageReducer,
       notificationReducer,
+      profileReducer,
     }),
     applyMiddleware(...middleware)
   );

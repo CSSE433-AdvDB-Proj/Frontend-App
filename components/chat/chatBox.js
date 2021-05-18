@@ -10,6 +10,7 @@ const mapStateToProps = (state, props) => {
     user: state.authReducer.user,
     token: state.authReducer.token,
     timestamp: state.messageReducer.timestamps[props.target],
+    profile: state.profileReducer,
   };
 };
 
@@ -52,7 +53,7 @@ class ChatBox extends React.Component {
         {
           from: this.props.user.username,
           to: this.props.target,
-          sender: this.props.target,
+          chat: this.props.target,
           content: this.state.content,
         },
         "/toGroup"
@@ -62,18 +63,20 @@ class ChatBox extends React.Component {
     this.props.send({
       from: this.props.user.username,
       to: this.props.target,
+      chat: this.props.target,
       content: this.state.content,
     });
   }
 
   render() {
     let target = this.props.target;
+    let name = this.props.profile.users[target.toLowerCase()];
     if (this.props.group == true) {
-      target = "Group";
+      name = this.props.profile.groups[target];
     }
     return (
       <div className="chatBox">
-        <div>{target}</div>
+        <div>{name}</div>
         <button className="loadMore" onClick={() => this.fetchMessages()}>
           Load more messages
         </button>

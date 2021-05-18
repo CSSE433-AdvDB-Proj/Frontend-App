@@ -4,7 +4,7 @@ const initialState = {
 
 /*
 type: "RECEIVED_NOTIFICATION",
-from: sender,
+from: from,
 payload: hook,
 header: "MESSAGE",
 timestamp
@@ -26,14 +26,15 @@ const parseNotification = (state, action) => {
   let notifications = [...state.notifications];
   if (action.header == "MESSAGE") {
     let notification = notifications.find((v) => {
-      return v.header == "MESSAGE" && v.sender == action.sender;
+      return v.header == "MESSAGE" && v.from == action.from;
     });
 
     if (notification == undefined) {
       notifications.push({
-        sender: action.sender,
+        from: action.from,
         header: action.header,
         timestamp: action.timestamp,
+        isGroupChat: action.isGroupChat,
         payload: action.payload,
         count: 1,
       });
@@ -43,7 +44,7 @@ const parseNotification = (state, action) => {
     }
   } else {
     notifications.push({
-      sender: action.sender,
+      from: action.from,
       header: action.header,
       timestamp: action.timestamp,
       payload: action.payload,
