@@ -17,24 +17,22 @@ const messageReducer = (state = initialState, action) => {
       return { ...initialState };
     case "FETCH_MESSAGES":
       messages =
-        state.messages[action.from] == null ? [] : state.messages[action.from];
+        state.messages[action.chat] == null ? [] : state.messages[action.chat];
       return {
         ...state,
         timestamps: {
           ...state.timestamps,
-          [action.from]: action.timestamp,
+          [action.chat]: action.timestamp,
         },
         messages: {
           ...state.messages,
-          [action.from]: [...action.messages, ...messages],
+          [action.chat]: [...action.messages, ...messages],
         },
       };
     case "RECEIVED_MESSAGE":
       messages =
-        state.messages[action.sender] == null
-          ? []
-          : state.messages[action.sender];
-      timestamp = state.timestamps[action.sender];
+        state.messages[action.chat] == null ? [] : state.messages[action.chat];
+      timestamp = state.timestamps[action.chat];
       if (action.timestamp < timestamp) {
         timestamp = action.payload.timestamp;
       }
@@ -42,11 +40,11 @@ const messageReducer = (state = initialState, action) => {
         ...state,
         timestamps: {
           ...state.timestamps,
-          [action.sender]: action.payload.timestamp,
+          [action.chat]: action.payload.timestamp,
         },
         messages: {
           ...state.messages,
-          [action.sender]: [...messages, action.payload],
+          [action.chat]: [...messages, action.payload],
         },
       };
     case "PULL_UNREAD":
@@ -63,33 +61,31 @@ export default messageReducer;
 
 export const getMessageHistory = (from, token, lastTimestamp) => {
   return (dispatch) => {
-    axios
-      .get("http://localhost:8080/blackboard/message/history_message", {
-        params: { messageCount: TO_FETCH, from, fromTimestamp: lastTimestamp },
-        headers: {
-          "Blackboard-Token": token,
-        },
-      })
-      .then((res) => {
-        if (res.data.code != 0) {
-          throw res.data.msg;
-        }
-
-        if (res.data.data.length == 0) {
-          throw "No messages";
-        }
-
-        let timestamp = res.data.data[res.data.data.length - 1].timestamp;
-        // console.log(res.data.data);
-        dispatch({
-          type: "FETCH_MESSAGES",
-          from,
-          timestamp,
-          messages: res.data.data.reverse(),
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    // axios
+    //   .get("http://localhost:8080/blackboard/message/history_message", {
+    //     params: { messageCount: TO_FETCH, from, fromTimestamp: lastTimestamp },
+    //     headers: {
+    //       "Blackboard-Token": token,
+    //     },
+    //   })
+    //   .then((res) => {
+    //     if (res.data.code != 0) {
+    //       throw res.data.msg;
+    //     }
+    //     if (res.data.data.length == 0) {
+    //       throw "No messages";
+    //     }
+    //     let timestamp = res.data.data[res.data.data.length - 1].timestamp;
+    //     // console.log(res.data.data);
+    //     dispatch({
+    //       type: "FETCH_MESSAGES",
+    //       from,
+    //       timestamp,
+    //       messages: res.data.data.reverse(),
+    //     });
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   };
 };

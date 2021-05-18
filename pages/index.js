@@ -7,6 +7,8 @@ import css from "styled-jsx/css";
 
 import cookieCutter from "cookie-cutter";
 
+import axios from "axios";
+
 import { connect } from "react-redux";
 
 const mapStateToProps = (state) => {
@@ -53,49 +55,8 @@ class Index extends React.Component {
           <p className="content"> {token} </p>
           <p className="content"> {username} </p>
           <p className="content"> {JSON.stringify(user)} </p>
-          {/* <div className="content">
-            Messages:
-            {Object.keys(this.props.messages).map((k) => {
-              return (
-                <div key={k}>
-                  {this.props.messages[k].map((v) => {
-                    return <div key={v.timestamp}>{`${k}: ${v.content}`}</div>;
-                  })}
-                </div>
-              );
-            })}
-          </div> */}
-          {/* <div className="content">
-            Notifications:
-            {this.props.notifications.map((k, i) => {
-              if (k.header == "MESSAGE") {
-                return (
-                  <div key={i}>
-                    <div>{`Message from: ${k.sender}`}</div>
-                    <div>{`Received on: ${k.timestamp}`}</div>
-                    <br />
-                  </div>
-                );
-              } else if (k.header == "FRIEND_REQUEST") {
-                return (
-                  <div key={i}>
-                    <div>{`Friend request from: ${k.sender}`}</div>
-                    <div>{`Received on: ${k.timestamp}`}</div>
-                    <br />
-                  </div>
-                );
-              } else {
-                return <p key={i}>Invalid notification header</p>;
-              }
-            })}
-          </div> */}
         </div>
-        Destination{" "}
-        <input onChange={(e) => (this.destination = e.target.value)} />
-        <button onClick={() => this.modal.current.openModal(this.destination)}>
-          Start chat
-        </button>
-        <ChatModal ref={this.modal} />
+
         <style jsx>{styles}</style>
       </div>
     );

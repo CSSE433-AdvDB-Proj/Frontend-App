@@ -12,6 +12,7 @@ import ChatModal from "../chat/chatModal";
 import FriendModal from "./friendModal";
 
 import Notifications from "./notifications";
+import GroupModal from "./groupModal";
 
 const mapStateToProps = (state) => {
   return {
@@ -26,9 +27,9 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-const SEARCHFRIEND = "Search Friend:";
+export const SEARCHFRIEND = "Search Friend:";
 const ADDUSER = "Add User:";
-const SEARCHGROUP = "Search Group:";
+export const SEARCHGROUP = "Search Group:";
 
 class Navbar extends React.PureComponent {
   constructor(props) {
@@ -37,6 +38,7 @@ class Navbar extends React.PureComponent {
     this.authModal = React.createRef();
     this.chatModal = React.createRef();
     this.friendModal = React.createRef();
+    this.groupModal = React.createRef();
 
     this.state = {
       expandProfile: false,
@@ -47,44 +49,77 @@ class Navbar extends React.PureComponent {
     this.target = "";
   }
 
-  enterPressed(user, forceFriend = false) {
-    // console.log(user);
-    if (forceFriend || this.state.search == SEARCHFRIEND) {
-      this.chatModal.current.openModal(user);
+  enterPressed(input, forceState) {
+    let state = forceState || this.state.search;
+    if (state == SEARCHFRIEND) {
+      axios
+        .get("http://localhost:8080/blackboard/friend/search_friend", {
+          params: { likeUsername: input },
+          headers: {
+            "Blackboard-Token": this.props.token,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          if (res.data.code != 0) {
+            throw "Error searching friend: " + res.data.msg;
+          }
+          if (res.data.data.length == 0) {
+            alert("Friend not found: " + input);
+            return;
+          }
 
-      // axios
-      //   .get("http://localhost:8080/blackboard/friend/search_friend", {
-      //     params: { likeUsername: user },
-      //     headers: {
-      //       "Blackboard-Token": this.props.token,
-      //     },
-      //   })
-      //   .then((res) => {
-      //     if (res.data.code != 0) {
-      //       throw "Error searching friend: " + res.data.msg;
-      //     }
-      //     if (res.data.data.length == 0) {
-      //       alert("Friend not found: " + user);
-      //     }
+          this.props.dispatch({
+            type: "LOAD_USER",
+            username: input.toLowerCase(),
+            name: res.data.data[0]["nickname"],
+          });
 
-      // this.chatModal.current.openModal(res.data.data[0].username);
-      // })
-      // .catch((err) => {
-      //   console.log(err);
-      // });
-    } else if (this.state.search == SEARCHGROUP) {
-      this.chatModal.current.openModal(user, true);
-    } else if (this.state.search == ADDUSER) {
+          this.chatModal.current.openModal(res.data.data[0].username);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (state == SEARCHGROUP) {
+      axios
+        .get("http://localhost:8080/blackboard/group/search_group", {
+          params: { groupName: input },
+          headers: {
+            "Blackboard-Token": this.props.token,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          if (res.data.code != 0) {
+            throw "Error searching group: " + res.data.msg;
+          }
+          if (res.data.data.length == 0) {
+            alert("Group not found: " + input);
+            return;
+          }
+
+          this.props.dispatch({
+            type: "LOAD_GROUP",
+            groupid: res.data.data[0]["groupId"],
+            name: res.data.data[0]["groupName"],
+          });
+
+          this.chatModal.current.openModal(res.data.data[0]["groupId"], true);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (state == ADDUSER) {
       axios
         .get("http://localhost:8080/blackboard/friend/send", {
-          params: { toUsername: user },
+          params: { toUsername: input },
           headers: {
             "Blackboard-Token": this.props.token,
           },
         })
         .then((res) => {
           if (res.data.code == 0) {
-            alert(`Friend request to ${user} sent.`);
+            alert(`Friend request to ${input} sent.`);
           } else {
             alert(res.data.msg);
           }
@@ -145,6 +180,14 @@ class Navbar extends React.PureComponent {
               Friends
             </div>
           </li>
+          <li>
+            <div
+              className="navbarItem"
+              onClick={() => this.groupModal.current.openModal()}
+            >
+              Groups
+            </div>
+          </li>
         </div>
 
         <div className="centerBar">
@@ -177,7 +220,9 @@ class Navbar extends React.PureComponent {
             </a>
             <div className="notiDropContent">
               <Notifications
-                openChat={(user) => this.enterPressed(user, true)}
+                openChat={(user, forceState) =>
+                  this.enterPressed(user, forceState)
+                }
               />
             </div>
           </li>
@@ -224,11 +269,19 @@ class Navbar extends React.PureComponent {
           ref={this.authModal}
           setToken={(t, d) => this.props.setToken(t, d)}
         />
-        <ChatModal ref={this.chatModal} send={(m, p) => this.props.send(m, p)} />
+        <ChatModal
+          ref={this.chatModal}
+          send={(m, p) => this.props.send(m, p)}
+        />
         <FriendModal
           ref={this.friendModal}
           token={this.props.token}
-          openChat={(user) => this.enterPressed(user, true)}
+          openChat={(user) => this.enterPressed(user, SEARCHFRIEND)}
+        />
+        <GroupModal
+          ref={this.groupModal}
+          token={this.props.token}
+          openChat={(user) => this.enterPressed(user, SEARCHGROUP)}
         />
         <style jsx>{styles}</style>
       </nav>

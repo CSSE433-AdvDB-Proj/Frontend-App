@@ -18,6 +18,12 @@ class NotificationCard extends React.PureComponent {
             </div>
           );
         })}
+        {!this.props.showButtons ? null : (
+          <div className="buttons">
+            <button onClick={() => this.props.acceptCallback()}>yes</button>
+            <button onClick={() => this.props.declineCallback()}>no</button>
+          </div>
+        )}
         <style jsx>{styles}</style>
       </div>
     );
@@ -31,6 +37,11 @@ const styles = css`
     padding: 5px;
     border-radius: 0 0 5px 5px;
     background-color: #333;
+  }
+
+  .buttons {
+    flex-direction: row;
+    justify-content: center;
   }
 
   .header,
