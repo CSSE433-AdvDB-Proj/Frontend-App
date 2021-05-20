@@ -1,13 +1,20 @@
+// slightly modified from:
+// https://dev.to/jerrymcdonald/creating-a-shareable-whiteboard-with-canvas-socket-io-and-react-2en
+
+// Thanks for the awesome tutorial, Jerry!
+
 import React, { useRef, useEffect } from "react";
+import axios from "axios";
+
 // import io from 'socket.io-client';
 // import "./styles/board.css";
 
 import css from "styled-jsx/css";
 
-const Board = () => {
+const Board = (props) => {
   const canvasRef = useRef(null);
   const colorsRef = useRef(null);
-  const socketRef = useRef();
+  const socketRef = props.getClient();
 
   useEffect(() => {
     // --------------- getContext() method returns a drawing context on the canvas-----
@@ -23,12 +30,13 @@ const Board = () => {
     console.log(test);
     // set the current color
     const current = {
-      color: "black",
+      color: "white",
     };
 
     // helper that will update the current color
     const onColorUpdate = (e) => {
-      current.color = e.target.className.split(" ")[1];
+      console.log(e);
+      current.color = e.target.classList[2];
     };
 
     // loop through the color elements and add the click event listeners
@@ -41,13 +49,15 @@ const Board = () => {
 
     const drawLine = (x0, y0, x1, y1, color, emit) => {
       //   y0 += canvasRef.current.
-      y0 -= 200;
-      y1 -= 200;
-      x0 += 10;
-      x1 += 10;
+      let dy0 = y0;
+      let dy1 = y1;
+      dy0 -= 200 - window.pageYOffset;
+      dy1 -= 200 - window.pageYOffset;
+      // x0 += 10;
+      // x1 += 10;
       context.beginPath();
-      context.moveTo(x0, y0);
-      context.lineTo(x1, y1);
+      context.moveTo(x0, dy0);
+      context.lineTo(x1, dy1);
       context.strokeStyle = color;
       context.lineWidth = 2;
       context.stroke();
@@ -58,14 +68,24 @@ const Board = () => {
       }
       const w = canvas.width;
       const h = canvas.height;
-
-      //   socketRef.current.emit("drawing", {
-      //     x0: x0 / w,
-      //     y0: y0 / h,
-      //     x1: x1 / w,
-      //     y1: y1 / h,
-      //     color,
-      //   });
+      // console.log(w);
+      // console.log(h);
+      // console.log(`Sending to: /toBoard/${props.boardID}`);
+      socketRef.send(
+        `/toBoard/${props.boardID}`,
+        {},
+        JSON.stringify({
+          from: props.username,
+          to: props.boardID,
+          content: {
+            x0: x0 / w,
+            y0: y0 / h,
+            x1: x1 / w,
+            y1: y1 / h,
+            color: color,
+          },
+        })
+      );
     };
 
     // ---------------- mouse movement --------------------------------------
@@ -146,26 +166,63 @@ const Board = () => {
 
     // ----------------------- socket.io connection ----------------------------
     const onDrawingEvent = (data) => {
-      const w = 1; //canvas.width;
+      // console.log(data);
+      const w = canvas.width;
       const h = canvas.height;
       drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color);
     };
 
     // socketRef.current = io.connect('/');
     // socketRef.current.on('drawing', onDrawingEvent);
+    console.log("setup: " + `/user/${props.username}/board/${props.boardID}`);
+    props
+      .getClient()
+      .subscribe(`/user/public/board/${props.boardID}`, (hook) => {
+        // console.log("Receiving from: " + `/toBoard/${props.boardID}`);
+        let body = JSON.parse(hook.body);
+        if (body.from == props.username) {
+          return;
+        } else {
+          onDrawingEvent(JSON.parse(body.content));
+          // axios
+          //   .post(
+          //     "http://localhost:8080/blackboard/drawing/getDrawing",
+          //     [
+          //       {
+          //         timestamp: body.timestamp,
+          //         boardId: props.boardID,
+          //       },
+          //     ],
+          //     {
+          //       headers: {
+          //         "Blackboard-Token": props.token,
+          //       },
+          //     }
+          //   )
+          //   .then((res) => {
+          //     // console.log(res);
+          //     return res.data.data[body.chatId];
+          //   })
+          //   .then((res) => {
+          //     res.forEach((line) => {
+          //       onDrawingEvent(line.content);
+          //     });
+          //   });
+        }
+      });
   }, []);
 
   // ------------- The Canvas and color elements --------------------------
 
   return (
     <div>
-      {/* <div ref={colorsRef} className="colors">
-        <div className="color black" />
+      <div ref={colorsRef} className="colors">
+        <div className="color white" />
         <div className="color red" />
         <div className="color green" />
         <div className="color blue" />
         <div className="color yellow" />
-      </div> */}
+      </div>
       <canvas ref={canvasRef} className="whiteboard" />
       <style jsx>{styles}</style>
     </div>
@@ -187,7 +244,7 @@ const styles = css`
     right: 0;
     /* bottom: 300px; */
     top: 200px;
-    background-color: white;
+    background-color: #333;
   }
 
   .colors {
@@ -200,8 +257,8 @@ const styles = css`
     width: 48px;
   }
 
-  .color.black {
-    background-color: black;
+  .color.white {
+    background-color: white;
   }
   .color.red {
     background-color: red;

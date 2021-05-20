@@ -26,41 +26,49 @@ class Draw extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      clicks: 0,
-      secretClicks: 2,
-      showToken: false,
+      boardID: "",
     };
 
-    this.modal = React.createRef();
+    this.board = React.createRef();
     this.destination = "";
   }
 
   componentDidMount() {
-    this.setState({ showToken: true });
+    this.setState({ boardID: this.props.query["boardID"] });
+  }
+
+  connect() {
+    console.log("called");
+    // console.log(this.props.getClient());
+    // this.props
+    //   .getClient()
+    //   .subscribe(`/toBoard/${this.state.boardID}`, (hook) => {});
+  }
+
+  static getInitialProps({ query }) {
+    return { query };
   }
 
   render() {
-    let token = this.props.token;
-    let user = this.props.user;
-    let username = user["username"];
+    let connected = "Connected to Board: " + this.state.boardID;
+    if (this.props.getClient() == null) {
+      return <div>Loading...</div>;
+    }
 
     // console.log(this.props.messages);
     return (
       <div className="container">
         <CustomHead title="Index" />
-        <div>
-          <p>Token</p>
-          <p className="content"> {token} </p>
-          <p className="content"> {username} </p>
-          <p className="content"> {JSON.stringify(user)} </p>
-        </div>
-        Destination{" "}
-        <input onChange={(e) => (this.destination = e.target.value)} />
-        <button onClick={() => this.modal.current.openModal(this.destination)}>
-          Start chat
-        </button>
-        <ChatModal ref={this.modal} />
-        <Board />
+        <h1>{connected}</h1>
+        {/* <button onClick={() => this.connect()}>Connect</button> */}
+        <Board
+          getClient={() => {
+            return this.props.getClient();
+          }}
+          boardID={this.state.boardID}
+          username={this.props.user.username}
+          token={this.props.token}
+        />
         <style jsx>{styles}</style>
       </div>
     );
@@ -75,7 +83,7 @@ const styles = css`
     align-items: center;
     align-self: center;
     margin: 10px auto;
-    width: 90%;
+    width: 100%;
   }
 
   .content {

@@ -30,7 +30,7 @@ const mapDispatchToProps = (dispatch) => {
 export const SEARCHFRIEND = "Search Friend:";
 const ADDUSER = "Add User:";
 export const SEARCHGROUP = "Search Group:";
-
+export const SEARCHGROUPBYID = "Search Group by ID:";
 class Navbar extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -105,6 +105,35 @@ class Navbar extends React.PureComponent {
           });
 
           this.chatModal.current.openModal(res.data.data[0]["groupId"], true);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (state == SEARCHGROUPBYID) {
+      axios
+        .get("http://localhost:8080/blackboard/group/info", {
+          params: { groupId: input },
+          headers: {
+            "Blackboard-Token": this.props.token,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          if (res.data.code != 0) {
+            throw "Error searching group id: " + res.data.msg;
+          }
+          if (res.data.data.length == 0) {
+            alert("Group id not found: " + input);
+            return;
+          }
+
+          this.props.dispatch({
+            type: "LOAD_GROUP",
+            groupid: res.data.data["groupId"],
+            name: res.data.data["groupName"],
+          });
+
+          this.chatModal.current.openModal(res.data.data["groupId"], true);
         })
         .catch((err) => {
           console.log(err);

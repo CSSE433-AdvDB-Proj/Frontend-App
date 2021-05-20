@@ -77,9 +77,11 @@ class ChatBox extends React.Component {
     return (
       <div className="chatBox">
         <div>{name}</div>
-        <button className="loadMore" onClick={() => this.fetchMessages()}>
-          Load more messages
-        </button>
+        {this.props.group ? null : (
+          <button className="loadMore" onClick={() => this.fetchMessages()}>
+            Load more messages
+          </button>
+        )}
         {/* read message logic */}
         <div className="messages">
           {this.props.messages == null

@@ -17,6 +17,19 @@ const notificationReducer = (state = initialState, action) => {
       return { ...initialState };
     case "RECEIVED_NOTIFICATION":
       return parseNotification(state, action);
+    case "REMOVE_NOTIFICATION":
+      let notifications = [...state.notifications];
+
+      let index = notifications.findIndex(
+        (item) => item.timestamp == action.timestamp
+      );
+      console.log(index);
+      if (index != -1) {
+        notifications.splice(index, 1);
+        return { ...state, notifications: notifications };
+      } else {
+        return state;
+      }
     default:
       return state;
   }

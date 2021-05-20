@@ -163,7 +163,7 @@ export default class MyApp extends App {
   }
 
   handleHook(token, username, hook, isGroup = false) {
-    console.log(hook)
+    console.log(hook);
     hook = JSON.parse(hook.body);
     switch (hook.type) {
       case "MESSAGE":
@@ -178,16 +178,22 @@ export default class MyApp extends App {
     }
   }
 
+  setClient(client) {
+    this.client = client;
+  }
+
   connect(token, username) {
     if (username == null || token == null) {
       console.log("TOKEN OR USERNAME EMPTY");
       return;
     }
     var socket = new SockJS("http://localhost:8080/blackboard/msg");
-    this.client = Stomp.over(socket);
-    this.client.debug = () => {};
-    this.client.connect({ "Blackboard-Token": token }, async (frame) => {
+    let client = Stomp.over(socket);
+    client.debug = () => {};
+    client.connect({ "Blackboard-Token": token }, async (frame) => {
+      this.setClient(client);
       console.log("Connected: " + frame);
+      this.setState({});
       await this.pullUnread(token);
       this.client.subscribe(`/user/${username}/group`, (hook) => {
         this.handleHook(token, username, hook, true);
@@ -261,7 +267,11 @@ export default class MyApp extends App {
               setToken={(t, d) => this.setToken(t, d)}
               send={(m, p) => this.send(m, p)}
             />
-            <Component {...pageProps} send={(m, p) => this.send(m, p)} />
+            <Component
+              {...pageProps}
+              getClient={() => this.client}
+              send={(m, p) => this.send(m, p)}
+            />
           </div>
         </Provider>
       </Container>

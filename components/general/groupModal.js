@@ -97,7 +97,13 @@ class GroupModal extends React.PureComponent {
           return;
         }
         alert("Group created");
-        this.setState({ groupname: "" });
+        this.setState({
+          groupname: "",
+          groups: [
+            ...this.state.groups,
+            { groupName: this.state.groupname, groupId: "refresh for id" },
+          ],
+        });
       })
       .catch((err) => {
         console.log(err);

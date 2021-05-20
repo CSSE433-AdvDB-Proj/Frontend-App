@@ -61,31 +61,32 @@ export default messageReducer;
 
 export const getMessageHistory = (from, token, lastTimestamp) => {
   return (dispatch) => {
-    // axios
-    //   .get("http://localhost:8080/blackboard/message/history_message", {
-    //     params: { messageCount: TO_FETCH, from, fromTimestamp: lastTimestamp },
-    //     headers: {
-    //       "Blackboard-Token": token,
-    //     },
-    //   })
-    //   .then((res) => {
-    //     if (res.data.code != 0) {
-    //       throw res.data.msg;
-    //     }
-    //     if (res.data.data.length == 0) {
-    //       throw "No messages";
-    //     }
-    //     let timestamp = res.data.data[res.data.data.length - 1].timestamp;
-    //     // console.log(res.data.data);
-    //     dispatch({
-    //       type: "FETCH_MESSAGES",
-    //       from,
-    //       timestamp,
-    //       messages: res.data.data.reverse(),
-    //     });
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+    axios
+      .get("http://localhost:8080/blackboard/message/history_message", {
+        params: { messageCount: TO_FETCH, from, fromTimestamp: lastTimestamp },
+        headers: {
+          "Blackboard-Token": token,
+        },
+      })
+      .then((res) => {
+        if (res.data.code != 0) {
+          throw res.data.msg;
+        }
+        if (res.data.data.length == 0) {
+          throw "No messages";
+        }
+        let timestamp = res.data.data[res.data.data.length - 1].timestamp;
+        dispatch({
+          type: "FETCH_MESSAGES",
+          chat: from,
+          timestamp,
+          messages: res.data.data.reverse().map((item) => {
+            return { ...item, chatId: item.from };
+          }),
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 };

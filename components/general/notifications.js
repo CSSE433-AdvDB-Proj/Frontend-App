@@ -4,7 +4,7 @@ import css from "styled-jsx/css";
 
 import { connect } from "react-redux";
 
-import { SEARCHFRIEND, SEARCHGROUP } from "./navbar";
+import { SEARCHFRIEND, SEARCHGROUP, SEARCHGROUPBYID } from "./navbar";
 
 import NotificationCard from "./notificationCard";
 import axios from "axios";
@@ -17,14 +17,16 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return {};
+  return {
+    dispatch: dispatch,
+  };
 };
 class Notifications extends React.Component {
   constructor(props) {
     super(props);
   }
 
-  respondFriend(user, value) {
+  respondFriend(user, value, timestamp) {
     axios
       .get("http://localhost:8080/blackboard/friend/respond", {
         params: { toUsername: user, accepted: value },
@@ -34,26 +36,55 @@ class Notifications extends React.Component {
       })
       .then((res) => {
         console.log(res);
-        // if (res.data.code != 0) {
-        //   throw "Error searching friend: " + res.data.msg;
-        // }
-        // if (res.data.data.length == 0) {
-        //   alert("Friend not found: " + input);
-        //   return;
-        // }
+        if (res.data.code != 0) {
+          throw "Error accepting friend: " + res.data.msg;
+        }
 
-        // this.props.dispatch({
-        //   type: "LOAD_USER",
-        //   username: input.toLowerCase(),
-        //   name: res.data.data[0]["nickname"],
-        // });
-
-        // this.chatModal.current.openModal(res.data.data[0].username);
+        this.props.dispatch({
+          type: "REMOVE_NOTIFICATION",
+          timestamp,
+        });
       })
       .catch((err) => {
-        console.log(err);
+        alert(err);
       });
   }
+
+  respondGroup(user, groupid, value, timestamp) {
+    axios
+      .get("http://localhost:8080/blackboard/group/respond", {
+        params: { groupId: groupid, accepted: value, inviter: user },
+        headers: {
+          "Blackboard-Token": this.props.token,
+        },
+      })
+      .then((res) => {
+        console.log(res);
+        if (res.data.code != 0) {
+          throw "Error accepting group: " + res.data.msg;
+        }
+
+        this.props.dispatch({
+          type: "REMOVE_NOTIFICATION",
+          timestamp,
+        });
+      })
+      .catch((err) => {
+        alert(err);
+      });
+  }
+
+  // async getGroupName(id) {
+  //   let data = await axios.get("http://localhost:8080/blackboard/group/info", {
+  //     headers: {
+  //       "Blackboard-Token": this.props.token,
+  //     },
+  //     params: {
+  //       groupId: id,
+  //     },
+  //   });
+  //   return data.data["groupName"];
+  // }
 
   render() {
     return (
@@ -71,7 +102,7 @@ class Notifications extends React.Component {
                     onPress={() => {
                       this.props.openChat(
                         k.from,
-                        k.isGroupChat ? SEARCHGROUP : SEARCHFRIEND
+                        k.isGroupChat ? SEARCHGROUPBYID : SEARCHFRIEND
                       );
                     }}
                   />
@@ -83,8 +114,12 @@ class Notifications extends React.Component {
                     key={k.timestamp}
                     header="Friend request:"
                     texts={["From: " + k.from]}
-                    acceptCallback={() => this.respondFriend(k.from, true)}
-                    declineCallback={() => this.respondFriend(k.from, false)}
+                    acceptCallback={() =>
+                      this.respondFriend(k.from, true, k.timestamp)
+                    }
+                    declineCallback={() =>
+                      this.respondFriend(k.from, false, k.timestamp)
+                    }
                     showButtons
                   />
                 );
@@ -100,7 +135,7 @@ class Notifications extends React.Component {
                 return (
                   <NotificationCard
                     key={k.timestamp}
-                    header="Friend rejected by:"
+                    header="Friend rejected:"
                     texts={[k.from]}
                   />
                 );
@@ -108,11 +143,41 @@ class Notifications extends React.Component {
                 return (
                   <NotificationCard
                     key={k.timestamp}
-                    header="Friend request:"
-                    texts={["From: " + k.from]}
-                    acceptCallback={() => this.respondFriend(k.from, true)}
-                    declineCallback={() => this.respondFriend(k.from, false)}
+                    header="Group request:"
+                    texts={["Group: " + k.payload.groupId, "From: " + k.from]}
+                    acceptCallback={() =>
+                      this.respondGroup(
+                        k.from,
+                        k.payload.groupId,
+                        true,
+                        k.timestamp
+                      )
+                    }
+                    declineCallback={() =>
+                      this.respondGroup(
+                        k.from,
+                        k.payload.groupId,
+                        false,
+                        k.timestamp
+                      )
+                    }
                     showButtons
+                  />
+                );
+              case "GROUP_INVITATION_ACCEPTED":
+                return (
+                  <NotificationCard
+                    key={k.timestamp}
+                    header="Group accepted:"
+                    texts={[k.from]}
+                  />
+                );
+              case "GROUP_INVITATION_REJECTED":
+                return (
+                  <NotificationCard
+                    key={k.timestamp}
+                    header="Group rejected:"
+                    texts={[k.from]}
                   />
                 );
               default:
